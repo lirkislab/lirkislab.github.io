@@ -1,0 +1,174 @@
+<html>
+ <head>
+    <meta charset="utf-8">
+    <title>LIRKIS G-CVE Smart Home</title>
+    <meta name="description" content="Basic Example — Networked-Aframe">
+     <!--AFRAME release + extras with dynamic functionality----------------------------------------------------------------->
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>  
+    <!--SUPERHANDS SCRIPT--------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script>
+    <!-- AFRAME EXTRAS components------------------------------------------------------------------------------------------->
+    <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v5.0.0/dist/aframe-extras.js"></script>
+    <!-- NETWORKED AFRAME -------------------------------------------------------------------------------------------------->    
+     <!-- <script src="https://unpkg.com/networked-aframe@^0.6.1/dist/networked-aframe.min.js"></script>--->    
+    <script src="/js/networkedAF.js"></script>
+    <!--PHYSICS SYSTEM------------------------------------------------------------------------------------------------------>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.1.1/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script>
+    <!--COMMUNICATION MODULES----------------------------------------------------------------------------------------------->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>   
+    <script src="easyrtc/easyrtc.js"></script>
+    <!--OTHER SCRIPTS------------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>
+    <!--CAM KINEMATICS COMPONENT-------------------------------------------------------------------------------------------->
+    <script src="https://rawgit.com/urish/aframe-camera-events/master/index.js"></script> 
+   <script src="js/userIDplaced.js"></script> 
+   <script src="js/body_rot.js"></script> 
+</head>
+  
+<body>
+    
+<!--- A-FRAME SCENE ----------------------------------------------------------------------------------------------------->
+    <a-scene 
+      physics 
+      networked-scene="
+      room: basic;
+      debug: true;                      
+    ">
+<!-- ASSETS INCLUDING ITEMS, MATERIAL, 3D OBJETS, SOURCES AND MIXINS, which are used to build 3D virtual environment --->      
+  <a-assets timeout="15000">
+<!-- PATHs of attached models -  stored on github ------------------------------------------------------------------------>
+              <a-asset-item id="hmd-obj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/head/avatarhead.obj"></a-asset-item>
+              <a-asset-item id="hmd-mtl" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/head/avatarhead.mtl"></a-asset-item>
+
+              <a-asset-item id="body-obj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/body/avatarbody.obj"></a-asset-item>
+              <a-asset-item id="body-mtl" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/body/avatarbody.mtl"></a-asset-item>
+
+           
+
+              <img id="sky4" src="https://cdn.glitch.com/71be7415-c9c7-4e9a-82c8-e228699322ea%2Ftexts.jpg?v=1570837351823" crossorigin="anonymous" />
+        
+<!-- Templates - objects utilized in AVATAR MODEL construction ------------------------------------------------------------------------>
+    
+              <template id="avatar-template">
+                    <a-entity class="avatar">
+                            <a-obj-model src="#hmd-obj" material="color:white; shader: flat; transparent: true; opacity: 0.3" scale="0.3 0.3 0.3">
+                            </a-obj-model>
+                            <a-sphere class="head" color="#A0A0B2" scale="0.02 0.02 0.02" position="0 -0.08 0" opacity="0.8"></a-sphere> 
+                            <a-text class="idtext" rotation="0 180 0" position="0 0.3 0" color="cyan" align="center" scale="0.8 0.8 0.8" value="LIRKIS USER"></a-text>  
+                            <a-entity class="rayhead" id="raycaster" cursor raycaster="objects: .clickable; showLine: true; far: 500" line="color: white; opacity: 1" position="0 0 0 " visible="true"></a-entity> 
+                    </a-entity>  
+              </template>
+
+              <template id="avatar-body">
+                  <a-entity class="bodyavatar">                        
+<!--                     <a-obj-model src="#body-obj" mtl="#body-mtl" scale="0.3 0.3 0.3" opacity="0.7">                           
+                    </a-obj-model>     -->
+                  </a-entity>
+              </template>
+    
+              <template id="avatar-abstract-body">
+                  <a-entity class="bodyavatar">                        
+                    <a-obj-model src="#body-obj" material="color:white; shader: flat; transparent: true; opacity: 0.3" scale="0.3 0.3 0.3" opacity="0.7">                           
+                    </a-obj-model>    
+                  </a-entity>
+              </template>
+              
+    
+  </a-assets> 
+<!-- /END OF ASSETS---------------------------------------------------------------------------------------------------->
+
+<!--SHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      <!-- AVATAR BODY ------------->
+      <a-entity id="fullbody"> 
+         <a-entity   
+                    id="rig"      
+                    networked="template:#avatar-body;attachTemplateToLocal:false;"  
+                    position = "-3.5 0 0"
+                    rotation="0 0 0"
+                    movement-controls   
+                    gaze-interaction  
+                    
+                    >
+                  <a-entity
+                            id="playerhead"
+                            networked="template:#avatar-template;attachTemplateToLocal:false;"  
+                            camera 
+                            position="0 1.6 0"
+                            rotation="0 0 0"
+                            look-controls="pointerLockEnabled:false"                          
+                            >                  
+                             <!--END OF 3D CURSOR IMPLEMENTATION ------------------------------------------->
+                             <a-text class="idtext" visible="true"  head-text ></a-text> <!-- head-text -->
+                             <a-sphere class="head" visible="true" random-color></a-sphere>
+                             <a-entity class="rayhead" cursor raycaster="objects: .clickable; showLine: true; far: 500" line="color: white; opacity: 1" position="0 0 0" visible="false"></a-entity> 
+                            <a-entity cursor="fuse: true; fuseTimeout: 500" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: black; shader: flat" position="0 0 -1"></a-entity> 
+                  </a-entity>  
+         </a-entity>  
+        <a-entity id="bodymodel"
+                  networked="template:#avatar-abstract-body;attachTemplateToLocal:false;"      
+                  position = "-3.5 0 0"
+                  rotation="0 -90 0"
+                  set-rotation
+                  set-position> 
+        </a-entity>
+      </a-entity> 
+      <!-- END OF AVATAR BODY ------------->
+<!-- END OFSHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      
+ <!-- NETWORKED AFRAME SCHEMES NAF including shared template and its property---------------------------------------------->   
+      <script>
+          NAF.schemas.add({
+        template: '#avatar-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.head',
+            component: 'material',
+            property: 'color'
+          },
+          {
+            selector: '.idtext',
+            component: 'text',
+            property: 'value'
+          }
+        ]
+      });
+    </script>
+      
+<!-- ENVIRONMENT OBJECTs------------------------------------------------------------------------------------------------------>   
+      
+      <a-text value="LIRKIS G-CVE" lirkis-text-component="" position="11.65515 4.63502 0.22146" rotation="0 -90 0" 
+              align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="3 3 1" text="color: #fdfdfd">
+      </a-text>
+      <!--       <a-plane src="#ground" height="100" width="100" material="side: double; color: green;" rotation="-90 0 0" static-body></a-plane> -->
+      
+
+      
+      <a-obj-model  id="room"
+                   src="https://raw.githubusercontent.com/mayorian/glitchproject/master/IntelligentRoom/IO2/io2.obj" 
+                   mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/IntelligentRoom/IO2/io2.mtl" 
+                   scale="0.61 0.61 0.61" rotation="0 0 0" position="0 0 0">  
+      </a-obj-model> 
+      
+      <a-obj-model id="gaz" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/forestmap/gazjeep/Y21BELCGQDNQZUWHQPSG4B8PN.obj" 
+                   mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/forestmap/gazjeep/Y21BELCGQDNQZUWHQPSG4B8PN.mtl" 
+                   scale="" rotation="0 -35.5 0" position="8.53811 1.12475 0" material="" obj-model="">  
+      </a-obj-model>
+      
+    <!--LIGHTS implementation -->
+     <a-entity light="color: #fff; intensity: 1; type: ambient;" visible="true"></a-entity>
+ 
+        <a-sky src="#sky4" rotation="0 90 0"></a-sky> 
+      
+
+    
+
+
+   
+</a-scene>
+
+  </body>
+</html>
