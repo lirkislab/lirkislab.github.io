@@ -1,0 +1,351 @@
+<html>
+ <head>
+    <meta charset="utf-8">
+    <title>LIRKIS Lab Showroom</title>
+    <meta name="description" content="Basic Example — Networked-Aframe">
+     <!--AFRAME release + extras with dynamic functionality----------------------------------------------------------------->
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>  
+    <!--SUPERHANDS SCRIPT--------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script>
+    <!-- AFRAME EXTRAS components------------------------------------------------------------------------------------------->
+    <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v5.0.0/dist/aframe-extras.js"></script>
+    <!-- NETWORKED AFRAME -------------------------------------------------------------------------------------------------->    
+     <!-- <script src="https://unpkg.com/networked-aframe@^0.6.1/dist/networked-aframe.min.js"></script>--->    
+    <script src="/js/networkedAF.js"></script>
+    <!--PHYSICS SYSTEM------------------------------------------------------------------------------------------------------>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.1.1/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script>
+    <!--COMMUNICATION MODULES----------------------------------------------------------------------------------------------->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>   
+    <script src="easyrtc/easyrtc.js"></script>
+    <!--OTHER SCRIPTS------------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>
+    <!--CAM KINEMATICS COMPONENT-------------------------------------------------------------------------------------------->
+    <script src="https://rawgit.com/urish/aframe-camera-events/master/index.js"></script> 
+     <!--   AFRAME TOOLTIP SCRIPT -->
+    <script src="/js/tooltip.js"></script> 
+   <script src="js/userIDplaced.js"></script> 
+   <script src="js/body_rot.js"></script> 
+</head>
+  
+<body>
+    
+<!--- A-FRAME SCENE ----------------------------------------------------------------------------------------------------->
+    <a-scene 
+      physics 
+             
+      networked-scene="
+      room: basic;
+      debug: true;                      
+    ">
+<!-- ASSETS INCLUDING ITEMS, MATERIAL, 3D OBJETS, SOURCES AND MIXINS, which are used to build 3D virtual environment --->      
+  <a-assets timeout="15000">
+<!-- PATHs of attached models -  stored on github ------------------------------------------------------------------------>
+              <a-asset-item id="hmd-obj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/head/avatarhead.obj"></a-asset-item>
+              <a-asset-item id="hmd-mtl" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/head/avatarhead.mtl"></a-asset-item>
+
+              <a-asset-item id="body-obj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/body/avatarbody.obj"></a-asset-item>
+              <a-asset-item id="body-mtl" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/body/avatarbody.mtl"></a-asset-item>
+
+              <a-asset-item id="environment-obj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/lirskishowroom.obj"></a-asset-item>
+              <a-asset-item id="environment-mtl" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/lirskishowroom.mtl"></a-asset-item>
+
+              <a-asset-item id="cave-obj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/CAVE/lirkiscavemodel.obj"></a-asset-item>
+              <a-asset-item id="cave-mtl" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/CAVE/lirkiscavemodel.mtl"></a-asset-item> 
+    
+              <a-asset-item id="cluster-obj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/cluster/cluster.obj"></a-asset-item>
+              <a-asset-item id="cluster-mtl" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/cluster/cluster.mtl"></a-asset-item> 
+    
+              <img id="sky4" src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2Fskybox.jpg?v=1601844728478" crossorigin="anonymous" />
+              <img id="TuFeiLogo" src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2FFEI.png?v=1601938743432" crossorigin="anonymous" />
+              <img id="KpiLogo" src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2Fkpi2.png?v=1601939474851" crossorigin="anonymous" />
+              <img id="GirlsDayLogo" src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2Flirkispress%20copy.png?v=1603924583064" crossorigin="anonymous" />
+              <img id="LirkisLogo" src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2Flirkis%20copy.png?v=1601941540169" crossorigin="anonymous" />
+    
+
+<!-- Templates - objects utilized in AVATAR MODEL construction ------------------------------------------------------------------------>
+    
+              <template id="avatar-template">
+                    <a-entity class="avatar">
+                            <a-obj-model src="#hmd-obj" material="color:white; shader: flat; transparent: true; opacity: 0.6" scale="0.3 0.3 0.3">
+                            </a-obj-model>
+                            <a-sphere class="head" color="#A0A0B2" scale="0.02 0.02 0.02" position="0 -0.08 0" opacity="0.8"></a-sphere> 
+                            <a-text class="idtext" rotation="0 180 0" position="0 0.3 0" color="cyan" align="center" scale="0.8 0.8 0.8" value="LIRKIS USER"></a-text>  
+<!--                             <a-entity class="rayhead" id="raycaster" cursor raycaster="objects: .clickable; showLine: true; far: 3" line="color: white; opacity: 1" position="0 0 0 " visible="true"></a-entity>  -->
+                    </a-entity>  
+              </template>
+              
+              <template id="avatar-template-presenter">
+                    <a-entity class="avatar">
+                            <a-obj-model src="#hmd-obj" material="color:orange; shader: flat; transparent: true; opacity: 0.6" scale="0.3 0.3 0.3">
+                            </a-obj-model>
+                            <a-sphere class="head" color="#A0A0B2" scale="0.02 0.02 0.02" position="0 -0.08 0" opacity="0.8"></a-sphere> 
+                            <a-text class="idtext" rotation="0 180 0" position="0 0.3 0" color="cyan" align="center" scale="0.8 0.8 0.8" value="LIRKIS USER"></a-text>  
+                            <a-entity class="rayhead" id="raycaster-presenter" cursor raycaster="objects: .clickable; showLine: true; far: 3" line="color: white; opacity: 1" position="0 0 0 " visible="true"></a-entity> 
+                    </a-entity>  
+              </template>
+
+              <template id="avatar-body">
+                  <a-entity class="bodyavatar">                        
+<!--                     <a-obj-model src="#body-obj" mtl="#body-mtl" scale="0.3 0.3 0.3" opacity="0.7">                           
+                    </a-obj-model>     -->
+                  </a-entity>
+              </template>
+    
+              <template id="avatar-abstract-body">
+                  <a-entity class="bodyavatar">                        
+                    <a-obj-model src="#body-obj" material="color:white; shader: flat; transparent: true; opacity: 0.6" scale="0.3 0.3 0.3" opacity="0.7">                           
+                    </a-obj-model>    
+                  </a-entity>
+              </template>
+              
+              <template id="avatar-abstract-body-presenter">
+                  <a-entity class="bodyavatar">                        
+                    <a-obj-model src="#body-obj" material="color:orange; shader: flat; transparent: true; opacity: 0.6" scale="0.3 0.3 0.3" opacity="0.7">                           
+                    </a-obj-model>    
+                  </a-entity>
+              </template>
+              
+    
+  </a-assets> 
+<!-- /END OF ASSETS---------------------------------------------------------------------------------------------------->
+
+<!--SHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      <!-- AVATAR BODY ------------->
+      <a-entity id="fullbody"> 
+         <a-entity   
+                    id="rig"      
+                    networked="template:#avatar-body;attachTemplateToLocal:false;"  
+                    position = "-3.5 0 0"
+                    rotation="0 0 0"
+                    movement-controls   
+                    gaze-interaction  
+                    
+                    >
+                  <a-entity
+                            id="playerhead"
+                            networked="template:#avatar-template-presenter;attachTemplateToLocal:false;"  
+                            camera 
+                            position="0 1.6 0"
+                            rotation="0 0 0"
+                            look-controls="pointerLockEnabled:false"                          
+                            >                  
+                             <!--END OF 3D CURSOR IMPLEMENTATION ------------------------------------------->
+                             <a-text class="idtext" visible="true"  head-text ></a-text> <!-- head-text -->
+                             <a-sphere class="head" visible="true" random-color></a-sphere>
+                             <a-entity class="rayhead" cursor raycaster="objects: .clickable; showLine: true; far: 3" line="color: white; opacity: 1" position="0 0 0" visible="false"></a-entity> 
+                            <a-entity cursor="fuse: true; fuseTimeout: 500" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: black; shader: flat" position="0 0 -1"></a-entity> 
+                  </a-entity>  
+         </a-entity>  
+        <a-entity id="bodymodel"
+                  networked="template:#avatar-abstract-body-presenter;attachTemplateToLocal:false;"      
+                  position = "-3.5 0 0"
+                  rotation="0 -90 0"
+                  set-rotation
+                  set-position> 
+        </a-entity>
+      </a-entity> 
+      <!-- END OF AVATAR BODY ------------->
+<!-- END OFSHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      
+ <!-- NETWORKED AFRAME SCHEMES NAF including shared template and its property---------------------------------------------->   
+      <script>
+          NAF.schemas.add({
+        template: '#avatar-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.head',
+            component: 'material',
+            property: 'color'
+          },
+          {
+            selector: '.idtext',
+            component: 'text',
+            property: 'value'
+          }
+        ]
+      });
+         NAF.schemas.add({
+        template: '#avatar-template-presenter',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.head',
+            component: 'material',
+            property: 'color'
+          },
+          {
+            selector: '.idtext',
+            component: 'text',
+            property: 'value'
+          }
+        ]
+      });
+    </script>
+      
+<!-- ENVIRONMENT OBJECTs------------------------------------------------------------------------------------------------------>   
+      
+<!-- TEXT OBJECTS -->
+<!--       <a-text id="lirkisgcvetitle" value="LIRKIS G-CVE" lirkis-text-component="" position="11.65515 4.63502 0.22146" rotation="0 -90 0" 
+              align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="3 3 1" text="color: #fdfdfd">
+      </a-text> -->
+      
+      <a-text id="lirkisCavetitle" value="LIRKIS CAVE" lirkis-text-component="" position="-12.52165 3.3684 -12.21251" rotation="" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="2 2 1" text="color: #fdfdfd">
+      </a-text>
+      
+       <a-text id="gcveavatarshistorytitle" value="V7voj avatarov 2018 - 2020" lirkis-text-component="" position="-17.09795 2.38691 -1.41579" rotation="0 90 0" align="center" 
+               font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="" text="value: LIRKIS G-CVE Avatars 2018-2020; color: #ffffff">
+      </a-text>
+      
+      <!--       <a-plane src="#ground" height="100" width="100" material="side: double; color: green;" rotation="-90 0 0" static-body></a-plane> -->
+<!--      END OF TEXT OBJECTS  -->
+<!--       ENVIRONMENT HALL -->
+      <a-obj-model  id="environmentOBJ"
+                   src="#environment-obj" 
+                   mtl="#environment-mtl" 
+                   scale="0.3 0.3 0.3" rotation="0 0 0" position="-8.788 0 -6.1">  
+      </a-obj-model> 
+      
+      <a-obj-model id="stagehistoryOBJ" 
+                   src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/stage/stage.obj" 
+                   mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/stage/stage.mtl" 
+                   scale="0.2 0.2 0.2" rotation="" position="-11.628 0 -4.35" material="" obj-model="">  
+      </a-obj-model>
+      
+<!--       <a-obj-model id="stageWalls" 
+                   src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/stage/stage2.obj" 
+                   mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/stage/stage2.mtl" 
+                   scale="0.3 0.3 0.3" rotation="" position="-8.788 0 -6.1" material="" obj-model="">  
+      </a-obj-model> -->
+      
+      <a-obj-model id="caveobj" src="#cave-obj" mtl="#cave-mtl" scale="1.2 1.3 1.2" position="-12.50135 -0.17612 -13.67788" rotation="" material="" obj-model="">
+      </a-obj-model>
+      
+      
+      <a-obj-model id="atronautobj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/Astronaut/Astronaut.obj" mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/Astronaut/Astronaut.mtl" scale="0.5 0.5 0.5" position="-9.31645 -0.05962 -5.28669" rotation="0 -57.63 0" material="" obj-model="">
+      </a-obj-model>
+      
+      <a-obj-model id="doggyobj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/Dog/doghmd.obj" mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/Dog/doghmd.mtl" scale="0.3 0.3 0.3" position="-10.3009 0.18427 4.85128" rotation="0 -57.63 0" material="" obj-model="">
+      </a-obj-model>
+      
+<!--       <a-obj-model id="pinetree" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/tree/PineTree.obj" mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/tree/PineTree.mtl" scale="0.5 0.5 0.5" position="-9.31645 -0.05962 -5.28669" rotation="0 -57.63 0" material="" obj-model="">
+      </a-obj-model> -->
+<!--       END OF ENVIRONMENT HALL -->
+      
+<!--       AVATARS 2018-2020 -->
+      <a-entity id="avatars" position="0 0.2 0">
+        
+        <a-text value="V7voj avatarov 2018 - 2020" lirkis-text-component="" position="-16.54446 1.27926 0.02978" rotation="0 90 0" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="0.7 0.7 1" text="value: 2018 -> ; color: #c9ff94">
+      </a-text>
+        
+        <a-text value="V7voj avatarov 2018 - 2020" lirkis-text-component="" position="-16.27988 1.27926 -1.26853" rotation="0 90 0" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="0.7 0.7 1" text="value: 2019 -> ; color: #ff6038">
+      </a-text>
+        
+        <a-text value="V7voj avatarov 2018 - 2020" lirkis-text-component="" position="-16.27988 1.27926 -2.44552" rotation="0 90 0" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="0.7 0.7 1" text="value: 2020; color: #004cff">
+      </a-text>
+        
+      <a-obj-model id="av2018" src="https://cdn.glitch.com/3b32ac74-0a36-49d9-b1a8-62b6bbd17c47%2Fhmd.obj?1553303987336" mtl="https://cdn.glitch.com/750b35b5-690c-461f-b6a6-a86917b44ac9%2Fhmd.mtl?1555325151796" scale="0.5 0.5 0.5" rotation="-15.678990063754977 -26.16870137701009 -10.666755271950537" position="-16.6485 1.58272 0.17971" material="" obj-model="">  
+      </a-obj-model>
+      
+      <a-obj-model id="av2019 body" src="https://cdn.glitch.com/ae1a6582-b74d-4c82-bb71-faf627e4789b%2Fbodys.obj?v=1560985819906" mtl="" scale="0.04 0.04 0.04" rotation="0 -63.935 0" position="-16.62536 0.00451 -1.22134" material="" obj-model="">  
+      </a-obj-model>
+      
+      <a-obj-model id="av2019 head" src="https://raw.githubusercontent.com/mayorian/3dmodels/master/avatar/avatar.obj" mtl="https://raw.githubusercontent.com/mayorian/3dmodels/master/avatar/avatar.mtl" scale="0.5 0.5 0.5" rotation="-15.678990063754977 -55.125415385126765 -10.666755271950537" position="-16.6485 1.58272 -1.16144" material="" obj-model="">  
+      </a-obj-model>  
+        
+      <a-obj-model id="av2020 body" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/body/avatarbody.obj" mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/body/avatarbody.mtl" scale="0.3 0.3 0.3" rotation="0 -63.935 0" position="-16.62536 0.00451 -2.50315" material="" obj-model="">  
+      </a-obj-model>
+      
+      <a-obj-model id="av2020 head" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/head/avatarhead.obj" mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/head/avatarhead.mtl" scale="0.3 0.3 0.3" rotation="-15.678990063754977 -55.125415385126765 -10.666755271950537" position="-16.58981 1.6015 -2.54631" material="" obj-model="">  
+      </a-obj-model>
+      </a-entity>
+<!--       End of AVATARS 2018-2020 -->
+
+<!--       VR Laboratory Equipment -->
+<!--       <a-obj-model id="quest" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/oculus/oculusquest.obj" mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/oculus/oculusquest.mtl" scale="0.08 0.08 0.08" rotation="0 119.59634536663238 0" position="-4.33947 1.09126 5.30163" material="" obj-model="">  
+      </a-obj-model> -->
+      
+      <a-curvedimage id="OCULUS" alpha-test="" material="alphaTest: 0; src: https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2F107-1073395_oculus-quest-hd-png-download.png?v=1603929824521" src="#KpiLogo" radius="4" theta-length="120" height="3" ``="" rotation="" scale="1.7 0.4 1" position="-4.37887 1.08819 5.2098" geometry="height: 2.5; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="HOLOLENS" alpha-test="" material="alphaTest: 0; src: https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2Fholo.png?v=1603930463151" src="#KpiLogo" radius="4" theta-length="120" height="3" ``="" rotation="" scale="1.11814 0.18791 0.75164" position="-1.98179 1.08819 5.2098" geometry="height: 2.5; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-obj-model id="printer" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/3dprinter/3dprinter.obj" mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/3dprinter/3dprinter.mtl" scale="0.25 0.25 0.25" rotation="0 -119.99999999999999 0" position="-6.54075 0.72887 5.30163" material="" obj-model="">  
+      </a-obj-model>
+      
+<!--       <a-obj-model id="hololens" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/hololens/hololens.obj" mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/hololens/hololens.mtl" scale="0.07 0.07 0.07" rotation="0 119.59634536663238 0" position="-2.16743 1.09126 5.30163" material="" obj-model="">  
+      </a-obj-model> -->
+<!--      END OF VR Laboratory Equipment -->
+      
+<!--       CURVED POSTERS -->
+      <a-curvedimage id="GilsDay2020Logo" alpha-test="" material="alphaTest: 0" src="#GirlsDayLogo" radius="4" theta-length="120" height="3" ``="" rotation="0 180 0" scale="8 1.7 1.2" position="-4.1519 2.2796 -5.91929" geometry="height: 2.5; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="CAVEposter" alpha-test="" material="alphaTest: 0" src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2Fcavepdf.png?v=1602121451978" radius="4" theta-length="120" height="3" ``="" rotation="0 90 0" scale="4.2 1 1.2" position="-8.95989 1.77148 -9.51963" geometry="height: 2.5; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="TUFEI1" alpha-test="" material="alphaTest: 0" src="#TuFeiLogo" radius="4" theta-length="120" height="3" ``="" rotation="0 -90 0" scale="2 0.4 1" position="-8.50442 2.3929 -3.92931" geometry="height: 2.5; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="TUFEI2" alpha-test="" material="alphaTest: 0" src="#TuFeiLogo" radius="4" theta-length="120" height="3" ``="" rotation="0 90 0" scale="2 0.4 1" position="-8.68661 2.3929 -3.92931" geometry="height: 2.5; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="KPI1" alpha-test="" material="alphaTest: 0" src="#KpiLogo" radius="4" theta-length="120" height="3" ``="" rotation="0 -90 0" scale="2 0.4 1" position="-8.50442 2.3929 3.66036" geometry="height: 2.5; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="KPI2" alpha-test="" material="alphaTest: 0" src="#KpiLogo" radius="4" theta-length="120" height="3" ``="" rotation="0 90 0" scale="2 0.4 1" position="-8.68728 2.3929 3.66036" geometry="height: 2.5; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="LIRKIS1" alpha-test="" material="alphaTest: 0" src="#LirkisLogo" radius="4" theta-length="120" height="3" ``="" rotation="0 -90 0" scale="2.3 1 1" position="-16.70843 3.79025 -1.29441" geometry="height: 2.5; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="LIRKIS1out" alpha-test="" material="alphaTest: 0" src="#LirkisLogo" radius="4" theta-length="120" height="3" ``="" rotation="" scale="3 1 1" position="-4.55452 3.8082 -6.42794" geometry="height: 2.5; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="LIRKIS GCVE" alpha-test="" material="alphaTest: 0" src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2Flirkisgcve%20copy.png?v=1601938196381" radius="4" theta-length="120" height="3" ``="" rotation="0 -98.7436 0" scale="1.2 1.2 1.2" position="-13.24173 1.961 1.45249" geometry="height: 2.5; radius: 3.5; thetaLength: 120"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="LIRKIScave" src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2Fthecave%20copy.png?v=1603929050617" radius="4" theta-length="120" height="3" rotation="0 -174.32183621075782 0" scale="1 1 1.41416" position="-14.78985 1.7078 -8.89812" material="" geometry="height: 2.3; radius: 2.5; thetaLength: 120"> 
+      </a-curvedimage>
+<!--       ENDOF CURVED POSTERS -->
+      
+<!--       TOOLTIPS -->
+      <a-text id="OculusTitle" value="LIRKIS G-CVE" lirkis-text-component="" position="-4.13789 2.60392 5.76232" rotation="0 180 0" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="" text="value: Oculus Quest; color: #fdfdfd">
+      </a-text>
+      
+      <a-text id="HoloLensTitle" value="LIRKIS G-CVE" lirkis-text-component="" position="-2.05704 2.60392 5.76232" rotation="0 180 0" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="" text="value: MS HoloLens; color: #fdfdfd">
+      </a-text>
+      
+      <a-text id="3DPrinterTitle" value="LIRKIS G-CVE" lirkis-text-component="" position="-6.27633 2.60392 5.76232" rotation="0 180 0" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="" text="value: 3D Printer; color: #fdfdfd">
+      </a-text>
+      
+<!--       <a-entity id="tooltipsMuseumVR3D" position=" 0 0 0.412" rotation="0 0 0">
+        <a-entity id="HoloLensTooltip" position="-2.0043 1.87406 5.40013" slice9="left: 20; right: 43; top: 20; bottom: 43; padding: 0.005; src: https://cdn.glitch.com/319ae213-8e1c-4738-bac9-a5730822d27a%2F99c1109d-b684-453a-81fe-1695d5ef4ef8.image.png?v=1600792941080" rotation="0 180 0" text="width: 1.4; color: #fff; value: The height of the handrail, \nwhich is the distance of the upper\n surface of the handrail (handrail)\n from the floor, must be at least 1 m; align: center">
+        </a-entity>
+
+        <a-entity id="OculusTooltip" position="-4.1342 1.87406 5.40013" slice9="left: 20; right: 43; top: 20; bottom: 43; padding: 0.005; src: https://cdn.glitch.com/319ae213-8e1c-4738-bac9-a5730822d27a%2F99c1109d-b684-453a-81fe-1695d5ef4ef8.image.png?v=1600792941080" rotation="0 180 0" text="width: 1.4; color: #fff; value: The height of the handrail, \nwhich is the distance of the upper\n surface of the handrail (handrail)\n from the floor, must be at least 1 m; align: center">
+         </a-entity>
+
+        <a-entity id="3DPrinterTooltip" position="-6.30051 1.87406 5.40013" slice9="left: 20; right: 43; top: 20; bottom: 43; padding: 0.005; src: https://cdn.glitch.com/319ae213-8e1c-4738-bac9-a5730822d27a%2F99c1109d-b684-453a-81fe-1695d5ef4ef8.image.png?v=1600792941080" rotation="0 180 0" text="width: 1.4; color: #fff; value: The height of the handrail, \nwhich is the distance of the upper\n surface of the handrail (handrail)\n from the floor, must be at least 1 m; align: center">
+         </a-entity>
+      </a-entity> -->
+<!--       END OF TOOLTIPS -->
+    <!--LIGHTS implementation -->
+     <a-entity light="color: #fff; intensity: 1; type: ambient;" visible="true"></a-entity>
+    <!--SKYBOX implementation -->
+    <a-sky src="#sky4" rotation="0 90 0"></a-sky> 
+      
+
+    
+
+
+   
+</a-scene>
+
+  </body>
+</html>
