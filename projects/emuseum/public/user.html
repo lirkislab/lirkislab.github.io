@@ -1,0 +1,349 @@
+<html>
+ <head>
+    <meta charset="utf-8">
+    <title>LIRKIS E-MUSEUM</title>
+    <meta name="description" content="Basic Example — Networked-Aframe">
+     <!--AFRAME release + extras with dynamic functionality----------------------------------------------------------------->
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>  
+    <!--SUPERHANDS SCRIPT--------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script>
+    <!-- AFRAME EXTRAS components------------------------------------------------------------------------------------------->
+    <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v5.0.0/dist/aframe-extras.js"></script>
+    <!-- NETWORKED AFRAME -------------------------------------------------------------------------------------------------->    
+     <!-- <script src="https://unpkg.com/networked-aframe@^0.6.1/dist/networked-aframe.min.js"></script>--->    
+    <script src="/js/networkedAF.js"></script>
+    <!--PHYSICS SYSTEM------------------------------------------------------------------------------------------------------>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.1.1/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script>
+    <!--COMMUNICATION MODULES----------------------------------------------------------------------------------------------->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>   
+    <script src="easyrtc/easyrtc.js"></script>
+    <!--OTHER SCRIPTS------------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>
+    <!--CAM KINEMATICS COMPONENT-------------------------------------------------------------------------------------------->
+    <script src="https://rawgit.com/urish/aframe-camera-events/master/index.js"></script> 
+     <!--   AFRAME TOOLTIP SCRIPT -->
+    <script src="/js/tooltip.js"></script> 
+   <script src="js/userIDplaced.js"></script> 
+   <script src="js/body_rot.js"></script> 
+   
+   <style> 
+     .mainUI
+      {
+        border: 0px solid pink; 
+        position: fixed; 
+        top: 5px;  
+        width:99%; 
+        height:99%; 
+        z-index: 1; 
+        pointer-events: none; /* allow click-through in transparent areas */
+      }
+    .regionUI
+    {
+      border: 1px solid blue;
+      position: absolute; 
+      display: flex;
+      flex-direction: row;
+      pointer-events: none;
+      color: white;
+      background-color: black;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+   </style>
+</head>
+  
+<body>
+  
+  <div class="mainUI" id="uiDiv" oncontextmenu="return false;">
+    <div class="regionUI" style="top: 10px; left: 10px;" oncontextmenu="return true;">        
+           <b>CLICK into the scene</b> - enable mouse control. <b>Press ESC </b> - disable mouse control.         
+    </div>  
+  </div>
+<!--- A-FRAME SCENE ----------------------------------------------------------------------------------------------------->
+    <a-scene 
+      physics 
+      vr-mode-ui="enabled: false"  
+      loading-screen="dotsColor: red; backgroundColor: black"
+      networked-scene="
+      room: basic;
+      debug: true;                      
+    ">
+<!-- ASSETS INCLUDING ITEMS, MATERIAL, 3D OBJETS, SOURCES AND MIXINS, which are used to build 3D virtual environment --->      
+  <a-assets timeout="15000">
+<!-- PATHs of attached models -  stored on github ------------------------------------------------------------------------>
+              <a-asset-item id="hmd-obj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/head/avatarhead.obj"></a-asset-item>
+              <a-asset-item id="hmd-mtl" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/head/avatarhead.mtl"></a-asset-item>
+
+              <a-asset-item id="body-obj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/body/avatarbody.obj"></a-asset-item>
+              <a-asset-item id="body-mtl" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/GCVE-AVATAR2020/body/avatarbody.mtl"></a-asset-item>
+
+              <a-asset-item id="environment-obj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/lirskishowroom.obj"></a-asset-item>
+              <a-asset-item id="environment-mtl" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/lirskishowroom.mtl"></a-asset-item>
+
+              <a-asset-item id="cave-obj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/CAVE/lirkiscavemodel.obj"></a-asset-item>
+              <a-asset-item id="cave-mtl" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/CAVE/lirkiscavemodel.mtl"></a-asset-item> 
+    
+              <a-asset-item id="cluster-obj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/cluster/cluster.obj"></a-asset-item>
+              <a-asset-item id="cluster-mtl" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/cluster/cluster.mtl"></a-asset-item> 
+    
+              <img id="sky4" src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2Fskybox.jpg?v=1601844728478" crossorigin="anonymous" />
+              <img id="TuFeiLogo" src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2FFEI.png?v=1601938743432" crossorigin="anonymous" />
+              <img id="KpiLogo" src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2Fkpi2.png?v=1601939474851" crossorigin="anonymous" />
+              <img id="GirlsDayLogo" src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2Flirkispress%20copy.png?v=1603924583064" crossorigin="anonymous" />
+              <img id="LirkisLogo" src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2Flirkis%20copy.png?v=1601941540169" crossorigin="anonymous" />
+    
+
+<!-- Templates - objects utilized in AVATAR MODEL construction ------------------------------------------------------------------------>
+    
+              <template id="avatar-template">
+                    <a-entity class="avatar">
+                            <a-obj-model src="#hmd-obj" material="color:white; shader: flat; transparent: true; opacity: 0.6" scale="0.3 0.3 0.3">
+                            </a-obj-model>
+                            <a-sphere class="head" color="#A0A0B2" scale="0.02 0.02 0.02" position="0 -0.08 0" opacity="0.8"></a-sphere> 
+                            <a-text class="idtext" rotation="0 180 0" position="0 0.3 0" color="cyan" align="center" scale="0.8 0.8 0.8" value="LIRKIS USER"></a-text>  
+<!--                             <a-entity class="rayhead" id="raycaster" cursor raycaster="objects: .clickable; showLine: true; far: 3" line="color: white; opacity: 1" position="0 0 0 " visible="true"></a-entity>  -->
+                    </a-entity>  
+              </template>
+              
+              <template id="avatar-template-presenter">
+                    <a-entity class="avatar">
+                            <a-obj-model src="#hmd-obj" material="color:orange; shader: flat; transparent: true; opacity: 0.6" scale="0.3 0.3 0.3">
+                            </a-obj-model>
+                            <a-sphere class="head" color="#A0A0B2" scale="0.02 0.02 0.02" position="0 -0.08 0" opacity="0.8"></a-sphere> 
+                            <a-text class="idtext" rotation="0 180 0" position="0 0.3 0" color="cyan" align="center" scale="0.8 0.8 0.8" value="LIRKIS USER"></a-text>  
+                            <a-entity class="rayhead" id="raycaster-presenter" cursor raycaster="objects: .clickable; showLine: true; far: 3" line="color: white; opacity: 1" position="0 0 0 " visible="true"></a-entity> 
+                    </a-entity>  
+              </template>
+
+              <template id="avatar-body">
+                  <a-entity class="bodyavatar">                        
+                    <a-obj-model src="#body-obj" material="color:white; shader: flat; transparent: true; opacity: 0.6" scale="0.3 0.3 0.3" opacity="0.7" visible="false">                           
+                    </a-obj-model> 
+                  </a-entity>
+              </template>
+    
+              <template id="avatar-abstract-body">
+                  <a-entity class="bodyavatar">                        
+                    <a-obj-model src="#body-obj" material="color:white; shader: flat; transparent: true; opacity: 0.6" scale="0.3 0.3 0.3" opacity="0.7">                           
+                    </a-obj-model>    
+                  </a-entity>
+              </template>
+              
+              <template id="avatar-abstract-body-presenter">
+                  <a-entity class="bodyavatar">                        
+                    <a-obj-model src="#body-obj" material="color:orange; shader: flat; transparent: true; opacity: 0.6" scale="0.3 0.3 0.3" opacity="0.7">                           
+                    </a-obj-model>    
+                  </a-entity>
+              </template>
+              
+    
+  </a-assets> 
+<!-- /END OF ASSETS---------------------------------------------------------------------------------------------------->
+
+<!--SHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      <!-- AVATAR BODY ------------->
+      <a-entity id="fullbody"> 
+         <a-entity   
+                    id="rig"      
+                    networked="template:#avatar-body;attachTemplateToLocal:false;"  
+                    position = "-6 3 -3.5"
+                    rotation="0 0 0"
+                    movement-controls   
+                    gaze-interaction  
+                    kinematic-body
+                    >
+                  <a-entity
+                            id="playerhead"
+                            networked="template:#avatar-template;attachTemplateToLocal:false;"  
+                            camera 
+                            position="0 1.6 0"
+                            rotation="0 0 0"
+                            look-controls="pointerLockEnabled:true"                          
+                            >                  
+                             <!--END OF 3D CURSOR IMPLEMENTATION ------------------------------------------->
+                             <a-text class="idtext" visible="true"  head-text ></a-text> <!-- head-text -->
+                             <a-sphere class="head" visible="true" random-color></a-sphere>
+                             <a-entity class="rayhead" cursor raycaster="objects: .clickable; showLine: true; far: 3" line="color: white; opacity: 1" position="0 0 0" visible="false"></a-entity> 
+                            <a-entity cursor="fuse: true; fuseTimeout: 500" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: black; shader: flat" position="0 0 -1"></a-entity> 
+                  </a-entity>  
+         </a-entity>  
+        <a-entity id="bodymodel"
+                  networked="template:#avatar-abstract-body;attachTemplateToLocal:false;"      
+                  position = "-3.5 0 0"
+                  rotation="0 -90 0"
+                  set-rotation
+                  set-position
+                  > 
+        </a-entity>
+      </a-entity> 
+      <!-- END OF AVATAR BODY ------------->
+<!-- END OFSHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      
+ <!-- NETWORKED AFRAME SCHEMES NAF including shared template and its property---------------------------------------------->   
+      <script>
+          NAF.schemas.add({
+        template: '#avatar-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.head',
+            component: 'material',
+            property: 'color'
+          },
+          {
+            selector: '.idtext',
+            component: 'text',
+            property: 'value'
+          }
+        ]
+      });
+        
+         NAF.schemas.add({
+        template: '#avatar-template-presenter',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.head',
+            component: 'material',
+            property: 'color'
+          },
+          {
+            selector: '.idtext',
+            component: 'text',
+            property: 'value'
+          }
+        ]
+      });
+    </script>
+      
+<!-- ENVIRONMENT OBJECTs------------------------------------------------------------------------------------------------------>   
+      
+<!-- TEXT OBJECTS -->
+<!--       <a-text id="lirkisgcvetitle" value="LIRKIS G-CVE" lirkis-text-component="" position="11.65515 4.63502 0.22146" rotation="0 -90 0" 
+              align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="3 3 1" text="color: #fdfdfd">
+      </a-text> -->
+      
+<!--       <a-text id="lirkisCavetitle" value="LIRKIS CAVE" lirkis-text-component="" position="-12.52165 3.3684 -12.21251" rotation="" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="2 2 1" text="color: #fdfdfd">
+      </a-text> -->
+      
+<!--      END OF TEXT OBJECTS  -->
+      
+<!-- PHYSICSAL Boundaries -->
+      <a-plane src="#ground" material="side: double; color: green" rotation="-90 0 0" static-body geometry="height: 50; width: 50"  id="GroundPlane" position="1.811 0 -3.253" visible="false"></a-plane>      <!-- END OF PHYSICSAL Boundaries  -->
+<a-box id="wall1" static-body color="#ffffff" height="1" width="1" depth="1" position="13.87619 1.581 -0.50699" rotation="90 90 0" scale="35 0.54 3" visible="false"></a-box>      
+<a-box id="wall2" static-body color="#ffffff" height="1" width="1" depth="1" position="-14.10869 1.581 -0.65856" rotation="90 90 0" scale="35 0.5 3" visible="false"></a-box>   
+<a-box id="wall3" static-body color="#ffffff" height="1" width="1" depth="1" position="0.02263 1.581 14.13592" rotation="90 0 0" scale="35 0.5 3" visible="false"></a-box>
+<a-box id="wall4" static-body color="#ffffff" height="1" width="1" depth="1" position="-0.78499 1.581 -14.18952" rotation="90 0 0" scale="35 0.5 3" visible="false"></a-box>
+<a-box id="wall5" static-body color="#ffffff" height="1" width="1" depth="1" position="8.558 1.58 0.01062" rotation="90 0 0" scale="15.92 0.69 3" visible="false"></a-box>
+<a-box id="wall6" static-body color="#ffffff" height="1" width="1" depth="1" position="-6.76686 1.58 -7.24771" rotation="90 0 0" scale="5.75 0.3 3" visible="false"></a-box>
+<a-box id="wall7" static-body color="#ffffff" height="1" width="1" depth="1" position="-6.76686 1.58 0.0776" rotation="90 0 0" scale="5.75 0.3 3" visible="false"></a-box>
+<a-box id="wall8" static-body color="#ffffff" height="1" width="1" depth="1" position="-6.76686 1.58 7.12702" rotation="90 0 0" scale="5.75 0.3 3" visible="false"></a-box>
+<a-box id="wall9" static-body color="#ffffff" height="1" width="1" depth="1" position="6.37617 1.58 7.12702" rotation="90 0 0" scale="5.75 0.3 3" visible="false"></a-box>
+<a-box id="wall10" static-body color="#ffffff" height="1" width="1" depth="1" position="6.37617 1.58 -7.30221" rotation="90 0 0" scale="5.75 0.3 3" visible="false"></a-box>
+           
+<!--       ENVIRONMENT HALL -->
+      <a-obj-model  id="room"
+                   src="https://raw.githubusercontent.com/lirkislab/gcve/main/IOmuseum/museumbaked.obj" 
+                   mtl="https://raw.githubusercontent.com/lirkislab/gcve/main/IOmuseum/museumbaked.mtl" 
+                   scale="0.2 0.2 0.2" rotation="0 0 0" position="0 0 0">  
+      </a-obj-model> 
+      
+      
+<!--       
+      <a-obj-model id="atronautobj" src="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/Astronaut/Astronaut.obj" mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/LIRKIS%20GCVE%20SHOWROOM/Astronaut/Astronaut.mtl" scale="0.6 0.6 0.6" position="2.94979 -0.039 -7.26303" rotation="0 -57.63 0" material="" obj-model="">
+      </a-obj-model> -->
+      
+      <a-obj-model id="statue" src="https://raw.githubusercontent.com/lirkislab/gcve/main/IOmuseum/statue/63CKSCSRK9Y0WXZB2JI7P1I9N.obj" mtl="https://raw.githubusercontent.com/lirkislab/gcve/main/IOmuseum/statue/63CKSCSRK9Y0WXZB2JI7P1I9N.mtl" scale="2 2 2" position="2.17802 2.25019 -6.95682" rotation="0 10 0" material="" obj-model="">
+      </a-obj-model>
+      
+      <a-obj-model id="statue2" src="https://raw.githubusercontent.com/lirkislab/gcve/main/IOmuseum/statue2/BGORQVLCBINX2EPS4WUNIDYTB.obj" mtl="https://raw.githubusercontent.com/lirkislab/gcve/main/IOmuseum/statue2/BGORQVLCBINX2EPS4WUNIDYTB.mtl" scale="2.2 2.2 2.2" position="12.17497 2.68029 11.9053" rotation="0 10 0" material="" obj-model="">
+      </a-obj-model>
+      
+      <a-obj-model id="statue3" src="https://raw.githubusercontent.com/lirkislab/gcve/main/IOmuseum/statue3/PIAJFHQ9NA2479YU5LQ27NG4A.obj" mtl="https://raw.githubusercontent.com/lirkislab/gcve/main/IOmuseum/statue3/PIAJFHQ9NA2479YU5LQ27NG4A.mtl" scale="2 2 2" position="-12.94137 2.402 3.81423" rotation="-3.5900000000000003 40 0" material="" obj-model="">
+      </a-obj-model>
+      
+      
+      
+<!--       END OF ENVIRONMENT HALL -->
+      
+
+      
+<!--       CURVED POSTERS -->
+      <a-curvedimage id="LIRKISIntroLogo" alpha-test="" material="alphaTest: 0; src: https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2FemuseumlogJ.jpg?v=1606084317164" src="#GirlsDayLogo" radius="4" theta-length="120" height="3" ``="" rotation="0 180 0" scale="5.43 0.66 1.2" position="-6.78396 1.47688 -6.79195" geometry="height: 2.5; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="TUFEI1" alpha-test="" material="alphaTest: 0" src="#TuFeiLogo" radius="4" theta-length="120" height="3" ``="" rotation="0 90 0" scale="2 0.4 1" position="-0.05759 4.17686 10.54824" geometry="primitive: plane; width: 1.2"> 
+      </a-curvedimage>
+        
+      <a-curvedimage id="KPI1" alpha-test="" material="alphaTest: 0" src="#KpiLogo" radius="4" theta-length="120" height="3" ``="" rotation="0 90 0" scale="2 0.4 1" position="-0.1959 4.05551 6.48698" geometry="height: 4; primitive: plane; width: 1.8"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="LIRKIS1" alpha-test="" material="alphaTest: 0" src="#LirkisLogo" radius="4" theta-length="120" height="3" ``="" rotation="0 90 0" scale="2.3 1 1" position="-0.06373 4.15594 2.57497" geometry="height: 2; primitive: plane; width: 0.8"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="Picture1" alpha-test="" material="alphaTest: 0; src: https://raw.githubusercontent.com/lirkislab/gcve/main/museumimages/img4.jpg" src="https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F5e741d08346be950d6402330_Bittman_Space_v2.jpg?v=1605977429520" radius="4" theta-length="120" height="3" ``="" rotation="0 180 0" scale="5 1 1.2" position="-6.62511 1.42065 7.45659" geometry="height: 2.13; primitive: plane; width: 0.74"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="Picture2" alpha-test="" material="alphaTest: 0; src: https://raw.githubusercontent.com/lirkislab/gcve/main/museumimages/img1.jpg" src="https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F5e741d08346be950d6402330_Bittman_Space_v2.jpg?v=1605977429520" radius="4" theta-length="120" height="3" ``="" rotation="0 180 0" scale="4.17 0.97 1.2" position="-6.75213 1.42065 0.37408" geometry="height: 1.83; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="Picture3LOGO-Poster" alpha-test="" material="alphaTest: 0; src: https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2Fanna-vr-artist.jpg?v=1605978668762" src="https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F5e741d08346be950d6402330_Bittman_Space_v2.jpg?v=1605977429520" radius="4" theta-length="120" height="3" ``="" rotation="0 180 0" scale="5 1 1.2" position="6.10368 1.42065 -6.84449" geometry="height: 1.83; primitive: plane; width: 0.85"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="Picture4" alpha-test="" material="alphaTest: 0; src: https://raw.githubusercontent.com/lirkislab/gcve/main/museumimages/img2.jpg" src="https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F5e741d08346be950d6402330_Bittman_Space_v2.jpg?v=1605977429520" radius="4" theta-length="120" height="3" ``="" rotation="" scale="5 1 1.2" position="-6.75213 1.42065 -0.43354" geometry="height: 1.83; primitive: plane; width: 0.85"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="Picture5" alpha-test="" material="alphaTest: 0; src: https://raw.githubusercontent.com/lirkislab/gcve/main/museumimages/img3.jpg" src="https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F5e741d08346be950d6402330_Bittman_Space_v2.jpg?v=1605977429520" radius="4" theta-length="120" height="3" ``="" rotation="" scale="5 1 1.2" position="-6.75213 1.42065 6.63073" geometry="height: 2.01; primitive: plane; width: 0.72"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="HistoryOfVR" alpha-test="" material="alphaTest: 0; src: https://raw.githubusercontent.com/lirkislab/gcve/main/museumimages/img7.png" src="https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F5e741d08346be950d6402330_Bittman_Space_v2.jpg?v=1605977429520" radius="4" theta-length="120" height="3" ``="" rotation="0 180 0" scale="8 1.2 1.2" position="6.619 2.54664 0.37408" geometry="height: 1.83; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="HistoryOfVRPoster" alpha-test="" material="alphaTest: 0; src: https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F357cb2b57553506ad65fb7eb4cb6be02.png?v=1606077329468" src="https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F5e741d08346be950d6402330_Bittman_Space_v2.jpg?v=1605977429520" radius="4" theta-length="120" height="3" ``="" rotation="" scale="4.01 1.45 1.2" position="6.22805 1.39517 6.6178" geometry="height: 1.83; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="LIRKISGCVEPOSTER" alpha-test="" material="alphaTest: 0; src: https://raw.githubusercontent.com/lirkislab/gcve/main/museumimages/img6.jpg" src="https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F5e741d08346be950d6402330_Bittman_Space_v2.jpg?v=1605977429520" radius="4" theta-length="120" height="3" ``="" rotation="0 90 0" scale="10 2.5 1.2" position="13.7862 3.70527 -6.84449" geometry="height: 1.83; primitive: plane; width: 0.85"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="GCVEoculus" alpha-test="" material="alphaTest: 0; src: https://raw.githubusercontent.com/lirkislab/gcve/main/museumimages/img14.jpg" radius="4" theta-length="120" height="3" ``="" rotation="0 180 0" scale="7 1.85 1.2" position="6.5891 1.99746 -13.48076" geometry="height: 1.83; primitive: plane; width: 0.85"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="ESCI1" alpha-test="" material="alphaTest: 0; src: https://raw.githubusercontent.com/lirkislab/gcve/main/museumimages/img15.jpg" src="https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F5e741d08346be950d6402330_Bittman_Space_v2.jpg?v=1605977429520" radius="4" theta-length="120" height="3" ``="" rotation="" scale="5.6 1.09 1.2" position="6.22894 1.42065 -7.68786" geometry="height: 1.83; primitive: plane; width: 0.85"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="Shared1" alpha-test="" material="alphaTest: 0; src: https://raw.githubusercontent.com/lirkislab/gcve/main/museumimages/img12.jpg" src="https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F5e741d08346be950d6402330_Bittman_Space_v2.jpg?v=1605977429520" radius="4" theta-length="120" height="3" ``="" rotation="0 180 0" scale="5.23 1.28 1.2" position="6.10368 1.42065 -6.82299" geometry="height: 1.83; primitive: plane; width: 0.85"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="Shared2" alpha-test="" material="alphaTest: 0; src: https://raw.githubusercontent.com/lirkislab/gcve/main/museumimages/img11.jpg" src="https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F5e741d08346be950d6402330_Bittman_Space_v2.jpg?v=1605977429520" radius="4" theta-length="120" height="3" ``="" rotation="" scale="6.88 1.8 1.2" position="6.33174 2.19632 -0.30864" geometry="height: 1.83; primitive: plane; width: 0.85"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="CaveJoystick" alpha-test="" material="alphaTest: 0; src: https://raw.githubusercontent.com/lirkislab/gcve/main/museumimages/img10.jpg" src="https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F5e741d08346be950d6402330_Bittman_Space_v2.jpg?v=1605977429520" radius="4" theta-length="120" height="3" ``="" rotation="0 180 0" scale="4.01 1.45 1.2" position="6.22805 1.39517 7.46489" geometry="height: 1.83; primitive: plane"> 
+      </a-curvedimage>
+      
+      <a-curvedimage id="VRgloves" alpha-test="" material="alphaTest: 0; src: https://raw.githubusercontent.com/lirkislab/gcve/main/museumimages/img9.jpg" src="https://cdn.glitch.com/305817c5-00b2-43d6-a082-193df9a58741%2F5e741d08346be950d6402330_Bittman_Space_v2.jpg?v=1605977429520" radius="4" theta-length="120" height="3" ``="" rotation="0 180 0" scale="6 1.83 1.2" position="6.22805 2.48618 13.49445" geometry="height: 1.83; primitive: plane"> 
+      </a-curvedimage>
+      
+<!--       ENDOF CURVED POSTERS -->
+      
+<!--       TOOLTIPS -->
+      
+    <!--LIGHTS implementation -->
+     <a-entity light="color: #fff; intensity: 1; type: ambient;" visible="true"></a-entity>
+     <a-entity id="pointlight" light="type: point; intensity: 5; distance: 6.43; decay: 1.3; color: #36d1be" position="10.90915 2.16485 -6.2022" rotation="0 -18.7 0"></a-entity>
+     <a-entity id="pointlight2" light="type: point; intensity: 5; distance: 7.65; decay: 0.63; color: #0707fc; penumbra: 0.59" position="6.76006 2.06091 4.10953" rotation="0 -18.7 0"></a-entity>      
+      
+      <!--SKYBOX implementation -->
+    <a-sky src="https://cdn.glitch.com/b0528d89-e091-4b8f-aae5-4c0213a6a896%2Fskybox.jpg?v=1601844728478" rotation="0 90 0"></a-sky> 
+      
+
+    
+
+
+   
+</a-scene>
+
+  </body>
+</html>
