@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>   
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <!--     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.0/materia/bootstrap.min.css"  crossorigin="anonymous"> -->
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.0/materia/bootstrap.min.css" crossorigin="anonymous"/>
+    
+    <title>VR Arm</title>
+  </head>
+  <body>
+    
+    <!-- Jumbotron -->
+    <div class="jumbotron" style="height:180px">
+      <h1 class="display-4">VRarm</h1>
+      <p class="display-5" style="height:20px">Rehabilitačný softvér 3D ruky v plne imerzívnej virtuálnej realite</p>
+    </div>
+
+       
+   <div class="card">
+      <div class="card-body mx-auto">
+        Prihlásenie sa do rozhrania experimentátora.
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="name">Meno : </span>
+                  <input type="Použivateľ" id="nameaccess" class="form-control" placeholder="Meno používateľa" aria-label="Username" aria-describedby="basic-addon1" required>
+                </div>
+              </div>
+            <div class="input-group mb-3">
+               <div class="input-group-prepend">
+                 <span class="input-group-text" id="pass">Heslo : </span>
+                 <input type="password" id="pswaccess" class="form-control" placeholder="Heslo" aria-label="Psw" aria-describedby="basic-addon1" required>
+            </div>
+          </div>
+    </div>
+     <button type="button" class="btn btn-primary mx-auto" onclick="authorizeClient()">Prihlásiť sa</button>
+     <p></p>
+    </div>
+    <p></p>
+    
+    <footer class="container">
+<!--         <p class="float-right"><a href="#">Back to top</a></p> -->
+      <div class="container mx-auto">
+        <p>© 2020, Provided by LIRKIS Laboratory· <a href="http://lirkis.kpi.fei.tuke.sk/sk/">LIRKIS Website</a> </p>
+      </div>
+    </footer>
+    
+    <script type="text/javascript">
+      
+      
+      /**
+      Funkcia pre zasielanie udajov o autorizacii a presmerovani klienta na stranku Experimentatora
+      Vstupne parametre su inputy html, meno a heslo
+      Vystupne data je JSON object ktory je zaslany na server, ak je serverom potvrdene overenie, 
+      potom sa klient presmeruje na adresu, ktoru mu server posle cez socket implementovany nizsie.
+      **/
+      function authorizeClient(){
+        var user = document.querySelector('#nameaccess').value;
+        var psw = document.querySelector('#pswaccess').value;
+        var dateStamp = new Date(); //vytvorenie zaznamu pre casovu znacku
+      //vytvorenie XHR requestu pre POST dat o pozicii a scalovani ruky na server
+        var xhr = new XMLHttpRequest();
+        var url = "https://vrarm2.glitch.me/requireaccess";//url na ktoru sa post posiela
+          xhr.open("POST", url, true);
+          xhr.setRequestHeader("Content-Type", "application/json");//obsah je JSON object
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                //Server posle adresu pre presmerovanie ako response na post
+                console.log(xhr.responseText);
+                }
+            };
+      //vytvorenie JSON object pre autorizacne udaje
+        var myObj = { "DATESTAMP": dateStamp, 
+                      "user": user, 
+                      "psw": psw, 
+                    };
+        
+        var myJSON = JSON.stringify(myObj);
+        xhr.send(myJSON);
+      }
+      
+      
+      //Metoda pre presmerovania klienta po prihlaseni serverom
+      var socket = io(); 
+      $(function () {
+          socket.on('message', function(msg) {
+            //hladanie retazca "rem" v sprave od servera
+                var accessString = msg.search("rem");
+                //validacia spravy s overenim, kde sa nachadza urceny retazec
+                if(accessString == 25)
+                  //presmerovanie klienta na adresu 
+                    document.location.assign (msg);
+          });
+      });
+      
+    </script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+  </body>
+</html>
