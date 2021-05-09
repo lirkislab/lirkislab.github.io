@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.0/materia/bootstrap.min.css" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="css/style.css" crossorigin="anonymous"/>
+    <script src="https://unpkg.com/networked-aframe@^0.6.0/dist/networked-aframe.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>   
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="easyrtc/easyrtc.js"></script>
+    
+    <title>Softvér ovládania 3D ruky</title>
+    
+    <style>
+          .print {
+              display:none
+              }
+          @media print {
+              .print {display:block}
+              .btn-print {display:none;}
+               }
+    </style>
+        
+    
+  </head>
+  <body>
+    <div class="jumbotron" style="height:220">
+      <h1 class="display-4">Softvér ovládania 3D ruky</h1>
+      <p class="lead">
+        Nástroj určený pre zmenu parametrov 3D ruky experimentátorom.
+      </p>
+      <hr class="my-4" />
+     
+  <!--    <a class="btn btn-primary btn-lg" href="http://3darm.glitch.me/hololensguide.html" role="button">Návod na používanie zariadenia MS HoloLens</a> -->
+<!--       <a class="btn btn-primary btn-lg" href="http://3darm.glitch.me/remoteguide.html" target="_blank" role="button">Návod na ovládanie softvéru 3D ruky</a> -->
+   <!--     <a class="btn btn-primary btn-lg" href="http://3darm.glitch.me/keys.html" role="button">Zoznam vstupných kláves ovládania</a> -->
+      <a class="btn btn-primary btn-lg" href="https://vrarm2.glitch.me" role="button">Späť</a>
+      <a class="btn btn-warning btn-lg" role="button" onclick="javascript:window.print()">Vytlačiť stránku</a> 
+      <button id="onlinestatus" type="button" class="btn btn-success btn-sm">Success
+      <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-person-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13.468 12.37C12.758 11.226 11.195 10 8 10s-4.757 1.225-5.468 2.37A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63z"/>
+        <path fill-rule="evenodd" d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+        <path fill-rule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"/>
+      </svg>
+      </button>
+      <p></p>
+
+              <p class="lead">
+                1.Najprv zapnúť toto rozhranie experimentátora.
+              </p>
+              <p class="lead">
+                2.Potom zapnúť Oculus Quest + zapnúť v ňom vizualizáciu ruky. 
+              </p>
+               <p class="lead">
+                3.Umiestniť Oculus Quest na hlavu subjektu. 
+              </p>
+              <p class="lead">
+                4.Pracovať s týmto rozhraním experimentátora a komunikovať so subjektom. 
+              </p>
+
+    </div>
+
+    <!-- style="background-color:#3d87ff" -->
+
+    <div class="container mb-5">
+      <div class="row">
+        <div class="col"> 
+                <!---------------Okno SETTINGS --->
+                <div class="alert alert-secondary" role="alert" style="height:350px">                
+                    <b>1. Vizualizácia z pohľadu používateľa / aktívna kamera zariadenia</b>
+                  <iframe
+                    src="https://vrarm2.glitch.me/training.html"
+                    width="100%"
+                    height="97%"
+                  ></iframe>
+
+                  <p></p>
+       
+                </div>
+        </div>
+        
+        <div class="col">
+                <!---------------Okno VISUALIZATION IFRAME --->
+                <div class="alert alert-primary" role="alert" style="height:400px">
+                    <b>2. Kalibrácia koordinácie 3D ruky v priestore</b>
+                      <p></p>
+                       <!---------------TABULKA PRE OVLADANIE GUI, POHYBU RUKY A CENTROVANIE --->
+                      <table class="table table-borderless text-left">
+                        <tbody>
+                        <tr>
+                                <!--<th scope="row"></th>                            
+                                <td><button type="button" class="btn btn-light"  onclick="sendKeyPost('o');">Zobraziť šípky</button></td>
+                                <td><button type="button" class="btn btn-light" onclick="sendKeyPost('p');">Skyť šípky</button></td>   -->
+
+                        </tr>
+                        <tr>
+                                <th scope="row"></th>                          
+                                <td><button type="button" class="btn btn-light" onclick="sendPost('scaleup');">Zväčšiť model +</button></td>
+                                <td class="text-center"><button type="button" class="btn btn-light" onclick="sendPost('scaledown');">Zmenšiť model -</button></td>  
+
+                        </tr>
+                        </tbody>
+                      </table>
+
+                      <table class="table table-borderless text-center">              
+                            <tbody>
+                              <tr>
+                                <th scope="row"></th>
+                                <td></td>
+                                <td><button type="button" class="btn btn-secondary " onclick="sendPost('movefront');">🡅</button></td>
+                                <td></td>
+                                <td><button type="button" class="btn btn-warning  btn-block" onclick="sendPost('moveup');">🡅🡅 Posun hore</button></td>
+                              </tr>
+                              <tr>
+                                <th scope="row" ></th>
+                                <td><button type="button" class="btn btn-secondary " style="height:100%" onclick="sendPost('moveleft');">🡄 </button></td>
+                                <td><button type="button" class="btn btn-light  " style="height:100%" onclick="sendPost('centerArm');">Centrovať</button></td>
+<!--                                 <td></td> -->
+                                <td><button type="button" class="btn btn-secondary " onclick="sendPost('moveright');">🡆</button></td>
+                                <td></td>
+                              </tr>
+                              <tr>
+                                <th scope="row"></th>
+                                <td></td>
+                                <td><button type="button" class="btn btn-secondary " onclick="sendPost('moveback');">🡇</button></td>
+                                <td></td>
+                                <td><button type="button" class="btn btn-warning  btn-block" onclick="sendPost('movedown');">🡇🡇 Posun dole</button></td>
+                              </tr>  
+                            </tbody>
+                          </table>  
+                  
+                  
+                  
+                </div>
+        </div>
+        <div class="w-100"></div>
+        
+        
+        <div class="col">
+                <!---------------Okno ANIMATION CONTROL --->
+                <div class="alert alert-secondary animations" role="alert">
+                  <h4>3. Sekvencie</h4>
+                  <div class="row justify-content-center p-3 mb-4 text-white">
+                    <div class="col-12"> 
+                      <div class="col-12">
+                        <div class="form-group row">
+                          <label class="col-7 label"><h5>Počet pohybov v sekvencii:</h5></label>
+                          <input id="sequence" type="number" class="col-3 m-0 form-control p-0 h-auto" value="8">
+                          <p id="countDown" class="align-self-end m-0 h5 d-none"></p>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <div class="form-group row">
+                          <label class="col-7 label"><h5>Dĺžka zobrazenia ruky:</h5></label>
+                          <div class="col-5 row">
+                            <input id="oneDuration" type="number" class="m-0 form-control p-0 h-auto col-6" value="20">
+                            <h6 class="col-6 sec">sec</h6>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-12">
+                        <div class="form-group row">
+                          <label class="col-7 label"><h5>Dĺžka pauzy medzi rukami:</h5></label>
+                          <div class="col-5 row">
+                            <input id="pauseDuration" type="number" class="m-0 form-control p-0 h-auto col-6" value="10">
+                            <h6 class="col-6 sec">sec</h6>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="checkbox">
+                        <label><input id="triggerCheckbox" type="checkbox" value="" class="mr-2">Spúšťať pohyb aj z tohto rozhrania</label>
+                      </div>
+                      <h5 id="wrongInput" style="text-align: center" class="text-danger font-weight-bold d-none">Hodnoty všetkých premenných musia byť nad 0!</h5>
+                    </div>
+                    <button type="button" id="startButton" class="btn btn-green m-3 col-3" onclick="startSequence();">Štart</button>
+                    <button type="button" id="resetButton" class="btn btn-red m-3 col-3 disabled" onclick="reset();" disabled>Reset</button>
+                    <button type="button" id="moveButton" class="btn btn-blue m-3 col-3 disabled" onclick="move();" disabled>Spusť pohyb</button>
+<!--                     <button type="button" class="btn btn-blue mr-3 mb-3 col-3" onclick="sendPost('startAnimationRound');">Otocenie ruky</button>
+                    <button type="button" class="btn btn-red mr-3 mb-3 col-3" onclick="sendPost('startAnimationKey');">Odomknutie zamky</button>
+                    <button type="button" class="btn btn-green mb-3 col-3" onclick="sendPost('startAnimationFingers');">Prsty</button>  
+                    <button type="button" class="btn btn-pink mr-3 mb-3 col-3" onclick="sendPost('startAnimationGlass');">Uchop pohar</button>
+                    <button type="button" class="btn btn-orange mr-3 mb-3 col-3" onclick="sendPost('startAnimationCube');">Presun kocky</button> 
+                    <button type="button" class="btn btn-purple mb-3 col-3" onclick="sendPost('startAnimationUpDown');">Dlan hore dole</button>       
+                    <button type="button" class="btn btn-dark col-3" onclick="sendPost('random');">Random</button>   -->
+                  </div>
+                  <!---------------TABULKA PRE OVLADANIE ANIMACIE --->
+                   <table class="table table-borderless text-center">
+                    <tbody>
+                    <tr>
+                            <th scope="row"></th> 
+                            <td><button type="button" class="btn btn-light " onclick="sendPost('startAnimation');">Uchopenie pohára Animácia</button></td>      
+                            <td><button type="button" class="btn btn-primary " onclick="sendPost('uchop');">Zobrazenie spravy UCHOP</button></td>
+                            <td><button type="button" class="btn btn-warning " onclick="sendKeyPost('triggerStart');"> RoboArm Trigger TEST</button></td> 
+                            <td><button type="button" class="btn btn-light " onclick="sendPost('');"> - </button></td> 
+                    </tr>        
+                    </tbody>
+                  </table>   
+                  
+                </div>
+        </div>
+        
+        <div class="col">
+                <!---------------Okno 3D ARM CONTROLLER --->
+                <div class="alert alert-secondary" role="alert" style="height:250px">
+                  <b>5. Kontroléry Oculus</b>
+                  <p></p>
+
+                  <!---------------TABULKA PRE OVLADANIE ANIMACIE --->
+                   <table class="table table-borderless text-center">
+                    <tbody>
+                      <tr>
+                              <th scope="row"></th>
+                              <td><button type="button" class="btn btn-danger" onclick="sendPost('conunvisible');">Skryť</button></td>
+                              <td><button type="button" class="btn btn-success" onclick="sendPost('convisible');">Zobraziť</button></td>  
+  <!--                             <td><button type="button" class="btn btn-primary" onclick="sendPost('');">Modrá</button></td>  -->
+                              <td><img src="https://cdn.glitch.com/f746543c-47b4-47ec-9167-8a28212e06ed%2Fqcontrollers.jpg?v=1596631868932" style="height:120px" class="rounded float-left" alt="..."></td>  
+                      </tr>  
+                      
+                     </tbody>
+                  </table>      
+                </div>
+        </div>
+      </div>
+    </div>
+    <p>
+<!--       Ulozenie konfiguracie ruky s hlaskou o moznostiach a pravidlach ulozenia -->
+          <a class="btn btn-warning  btn-block" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+            Konfigurácia ruky
+          </a>
+        </p>
+        <div class="collapse" id="collapseExample">
+          <div class="card card-body">
+<!--             <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">X</button> -->
+            <p></p>
+            Pozor! Konfigurácia ruky sa ukladá, až keď je ruka správne nastavená a subjekt s týmto nastavením súhlasí. Toto nastavenie sa následne používa pri ďalšom experimente s rovnakým subjektom.  
+            <p></p>
+            <b> Uložiť konfigutáciu - </b>uloží sa pozícia a veľkosť ruky.
+            <p></p>
+            <b> Nastaviť konfigutáciu - </b>nastaví sa posledne uložená pozícia a veľkosť ruky.
+            <p></p>
+            <button type="button" class="btn btn-danger  btn-block" onclick="sendPost('PostConfigToServer');">Uložiť konfiguráciu</button>
+            <button type="button" class="btn btn-success  btn-block" onclick="sendPost('GetConfigFromServer');">Načítať uloženú konfiguráciu</button>
+            <p></p>
+          </div>
+        </div>
+    
+    <div class="alert alert-danger" role="alert" style="width:840">
+    <b>Po ukončení experimentu nezabudnite vypnúť 3D ruku a potom zariadenie.</b>
+<!--     <b> Odkaz na vypnutie tu : <a href="http://3darm.glitch.me/hololensguide.html#closeappdevice">Tu kliknúť pre návod k vypnutiu</a></b> -->
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+    
+     <script type="text/javascript">
+       //Rozhranie experimentatora komunikuje so serverom len cez sockety, 
+       //tu je vypracovana metoda pre zasielanie dat na server pri klikani na tlacidla experimentatora.
+       //Implementovany mechanizmus je pomocou Jquery
+       var counter = 0;
+       var interval;
+       var timeout;
+       var animationRunning = false;
+       var trainingRunning = false;       
+       var socket = io();
+       
+       function startSequence() {
+         if(sequence.value > 0 && oneDuration.value > 0 && pauseDuration.value > 0){
+           wrongInput.classList.add("d-none");
+           wrongInput.classList.remove("d-block");
+           countDown.classList.remove("d-none");
+           countDown.classList.add("d-block");
+           trainingRunning = true;
+           counter = sequence.value;
+           startButton.classList.add("disabled");
+           startButton.disabled = true;      
+           triggerCheckbox.disabled = true;    
+           sequence.disabled = true; 
+           oneDuration.disabled = true; 
+           pauseDuration.disabled = true;
+           resetButton.classList.remove("disabled");
+           resetButton.disabled = false;    
+           if(triggerCheckbox.checked){
+             moveButton.classList.remove("disabled");
+             moveButton.disabled = false;        
+           }
+           socket.emit('message', { start: true, counter: sequence.value, duration: oneDuration.value, pause: pauseDuration.value });
+         } else {
+           wrongInput.classList.remove("d-none");
+           wrongInput.classList.add("d-block");
+         }
+       }
+       
+       function next() {
+         /*if(counter <= 1) {
+           clearInterval(interval);
+           clearTimeout(timeout);
+           reset();
+         } else {
+           actualValue.innerHTML = --counter;
+           sendPost("start");  
+           console.log(counter);            
+         } */   
+       }
+       
+       function move() {
+           sendPost("move");
+         /*if(!animationRunning){
+           animationRunning = true;
+           sendPost("move");
+           clearInterval(interval); 
+         }*/
+       }
+       
+       function reset() {
+         if(trainingRunning){
+           trainingRunning = false;
+           counter = 0;
+           triggerCheckbox.disabled = false;
+           resetButton.classList.add("disabled");
+           resetButton.disabled = true; 
+           moveButton.classList.add("disabled");
+           moveButton.disabled = true; 
+           sequence.disabled = false;
+           oneDuration.disabled = false; 
+           pauseDuration.disabled = false;
+           animationRunning = false;
+           //clearInterval(interval);
+           //clearTimeout(timeout);
+           countDown.classList.add("d-none");
+           countDown.classList.remove("d-block");
+           sendPost("reset");
+           setTimeout(() => {
+             startButton.classList.remove("disabled");
+             startButton.disabled = false;   
+           }, 2000);
+         }
+       }
+
+       $(function () {
+         socket.on('message', function(msg) {
+           console.error("Prikaz z training: ");
+           console.error(msg);
+           if(msg == 'stopSequence' || msg == "reset"){
+             reset();
+             msg = '';
+           }
+         });
+         socket.on('countDown', function(msg) {
+           console.error("Counter: " + msg);
+           if(msg > 0)
+             countDown.innerHTML = "/ " + msg;
+           else
+             countDown.innerHTML = "/ ";
+         });
+       });
+         
+       function sendPost(inputCommand) {
+                $(function () {
+                  socket.emit('message', inputCommand);
+                  
+                  socket.on('message', function(msg) {
+                   // $("#myTextarea").text(msg);
+                   // $('#messages').scrollTop($('#messages').prop("scrollHeight"));
+                   // document.getElementById("myTextarea").value =  $('#messages').text(msg); 
+                    console.error("Prikaz z rozhrania 3D ruky: " + msg);
+                  });
+                });
+       };
+       
+       //Pouzivatel dava najavo, ze je pripojeny //frekvencia obnovovania spravyje 30sek 
+//        window.setInterval(onlineAnnotation, 10000);
+//        function onlineAnnotation(){
+//          //socket.emit('message', "imOnline"); 
+//          socket.to('vrarmroom1').emit('message', 'imOnline');
+//        }
+       
+//        //Signalizacia ak je niektory pouzivatel online 
+//        $(function () {
+//            socket.on('message', function(msg) {
+//                        if(msg == "imOnline"){
+//                         alert("Prikaz z rozhrania 3D ruky: " + msg);
+//                        }
+             
+//             });
+//          });
+       
+       //Post na trstovanie triggera u Romana - Robo Arm 
+       function sendKeyPost(data){
+         //vytvorenie XHR requestu pre POST dat o pozicii a scalovani ruky na server
+          var xhr = new XMLHttpRequest();
+          var url = "https://vrarm2.glitch.me/" + data;//url na ktoru sa post posiela
+              xhr.open("POST", url, true);
+              xhr.setRequestHeader("Content-Type", "application/json");
+              xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    //var json = JSON.parse(xhr.responseText);
+                    //console.log(xhr.responseText);
+                    }
+                };
+          xhr.send(null);
+      };
+         
+    </script>
+  </body>
+</html>

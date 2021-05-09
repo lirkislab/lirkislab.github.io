@@ -1,0 +1,474 @@
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LIRKIS G-CVE platform</title>
+    <meta name="description" content="Basic Example — Networked-Aframe">
+
+     <!--AFRAME release + extras with dynamic functionality-->
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>  
+    <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v5.0.0/dist/aframe-extras.js"></script>
+    <script src="/dist/movement-controls.js"></script>
+    
+    <script src="https://unpkg.com/networked-aframe@^0.6.0/dist/networked-aframe.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>   
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="easyrtc/easyrtc.js"></script>
+      
+    <script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>
+    <script src="https://unpkg.com/aframe-particle-system-component@1.0.5/dist/aframe-particle-system-component.min.js"></script>
+    <script src="https://rawgit.com/urish/aframe-camera-events/master/index.js"></script>
+    <script src="/js/getThePosition.js"></script>
+    <script src="/js/userID.js"></script>
+    <script src="/js/VRarmComponents.js"></script>
+<!--     <script src="/js/gui-backend.js"></script> -->
+    
+
+    <!--<script src="/js/restapi.js"></script>-->
+    
+  </head>
+  <body>
+<!--     <div id="myEmbeddedScene"> -->
+<!--     <a-scene embedded
+      networked-scene="
+      room: basic;
+      debug: true;                              
+    "
+   cursor="rayOrigin:mouse"> -->
+      
+      <a-scene
+      networked-scene="
+      room: basic;
+      debug: true;                              
+    "
+   cursor="rayOrigin:mouse">
+      <a-assets>
+        
+         <!-- RAMENO -->
+<!--         <a-asset-item id="arm-gltf" src="https://raw.githubusercontent.com/mayorian/3dmodels/master/VRamr_out/VRamr2_out/VRamr2.gltf" crossorigin="anonymous"></a-asset-item> -->
+    
+         <!-- helma na hlave avatara -->
+        <a-asset-item id="hmd-obj" src="https://cdn.glitch.com/3b32ac74-0a36-49d9-b1a8-62b6bbd17c47%2Fhmd.obj?1553303987336"></a-asset-item>
+        <a-asset-item id="hmd-mtl" src="https://cdn.glitch.com/3b32ac74-0a36-49d9-b1a8-62b6bbd17c47%2Fhmd.mtl?1553304027663"></a-asset-item>
+        
+        
+        <img id="sky" src="https://cdn.glitch.com/166af01a-d529-4908-885b-73f3af1b26d9%2Fatd.jpg?1553305334999" crossorigin="anonymous" />
+        <img id="tab1" src="https://cdn.glitch.com/1666b40a-5fca-4377-b5c8-3e356c94eb91%2Faframe%20cve2.png?v=1560643154778"/>
+        <img id="sky4" src="https://cdn.glitch.com/f746543c-47b4-47ec-9167-8a28212e06ed%2Flebombo_2k.jpg?v=1594369099633" crossorigin="anonymous" />
+        <img id="guiarrows" src="https://cdn.glitch.com/976ec309-5c22-4c52-93dd-892d5184766f%2Fnawgui.png?v=1570310226107" crossorigin="anonymous" />
+       
+
+        <!-- Templates -->
+
+          <!-- Avatar HLAVA-->
+            <template id="avatar-template">
+              <a-entity class="avatar">
+                        <a-obj-model src="#hmd-obj" mtl="#hmd-mtl" scale="0.5 0.5 0.5">
+                              <a-cylinder width="0.1" height="2.7" position="0 0 -3.0" rotation="90 0 0" scale="0.01 2 0.01" opacity="0.5" color="cyan">
+                              </a-cylinder>
+                        </a-obj-model>
+                        <a-sphere class="head" color="#A0A0B2" scale="0.2 0.2 0.2" position="0 -0.08 0" random-color opacity="0.5"></a-sphere>
+                            <a-text class="idtext" rotation="0 180 0" position="0 0.3 0" color="#00ff00" align="center" scale="0.8 0.8 0.8" value="LIRKIS USER"></a-text>  
+              </a-entity>
+            </template>
+         <!-- Body  TELO AVATARA-->
+        <template id="avatar-body">
+              <a-entity class="avatar">                    
+                        <a-octahedron width="0.1" height="2.7" position="0 0.6 0" rotation="0 0 180" scale="0.3 0.9 0.3" opacity="0.3">
+                        </a-octahedron>    
+              </a-entity>
+          </template>
+        
+        <!-- S.J. start -->
+      <a-asset-item id="handAsset" src="https://cdn.glitch.com/27b68365-ab29-4f7a-bac4-e46bb9238d99%2FfingersOutIn1.glb?v=1607531983416"></a-asset-item>
+        <!-- S.J. end -->
+
+        <!-- /Templates -->
+      </a-assets>
+      
+      
+       
+
+  <!-- ZDIELANA ENTITA AVATAR TELO ----------------------------------------------------------------------------------------------------------->
+    <a-entity           
+                  id="rig"   
+                  movement-controls 
+                  position-listener                  
+                  position="-0.587 0 0.911"
+                  gui-component-move           
+         > 
+  <!-- ZDIELANA ENTITA AVATAR HLAVA -->
+        <a-entity
+             id="player"
+              camera
+              position="0 1.6 0"
+              rotation=""
+              look-controls="pointerLockEnabled:false"            
+              >
+  <!-- ZDIELANA ENTITA AVATAR TEXT NAD HLAVOU -->
+                <a-text class="idtext"
+                        visible="true"               
+                >
+                </a-text> 
+         <!--  <a-entity cursor="fuse: true; fuseTimeout: 500"
+                                      position="0 0 -1"
+                                      geometry="primitive: ring; radiusInner: 0.005; radiusOuter: 0.01"
+                                      material="color: white; shader: flat">
+                            </a-entity> -->
+              <a-sphere class="head"
+              visible="true"
+              random-color
+              >
+              </a-sphere>       
+        </a-entity>
+       <a-entity id="rhand" mixin="touch"
+                      oculus-touch-controls="hand: right"
+                      >
+            </a-entity>
+ <!------------------------KONIEC ZDIELANYCH ENTIT--------------------------------------------------------------------------------------->
+      
+ <!--GRAFICKE GUI PRI RUKE - START OF GAZE  MOVEMENT ENTITIES IMPLEMENTATION ------------------------------------------------------------>
+      <a-entity  id="fullgui" scale="1 1 1" rotation=" 0 -41.580 0" position="-0.820 -0.080 -1000">
+                  <a-entity id="frontmove" material="transparent: true; src:#guiarrows" geometry="primitive: plane" 
+                        position="0.314 1.233 -1.3" rotation="0 0 90" scale="0.1 0.1 0.1">
+                  </a-entity>
+           
+                  <a-entity id="backmove"  material="transparent: true; src:#guiarrows" geometry="primitive: plane" 
+                        position="0.31 1.08 -1.3" rotation="0 0 150" scale="0.1 0.1 0.1">
+                  </a-entity>
+           
+                  <a-entity id="leftmove" material="transparent: true; src:#guiarrows" geometry="primitive: plane" 
+                        position="0.19 1.17 -1.3" rotation="0 0 180" scale="0.1 0.1 0.1">
+                  </a-entity>
+           
+                  <a-entity id="rightmove" material="transparent: true; src:#guiarrows" geometry="primitive: plane" 
+                        position="0.43 1.17 -1.3" rotation="0 0 0" scale="0.1 0.1 0.1"> 
+                  </a-entity>
+      
+      </a-entity>
+
+
+<!--END OF GAZE  MOVEMENT ENTITIES IMPLEMENTATION --------------------------------------------------------------------------------------->
+    </a-entity> 
+         
+  <!--CELA RUKA OD RAMENA PO PRSTY -->
+       <!-- Entita s ID "fullarm" predstavuje mnozinu objektov celej ruky -->
+     <a-entity id="fullarm" position="-0.458 0.600 0.482" scale="0.7 0.7 0.7" shadow="receive: false; cast: false"
+                 >
+        <!--<a-entity id="armEntity"
+                  gltf-model="https://raw.githubusercontent.com/mayorian/3dmodels/master/VRamr_out/VRamr2_out/VRamr2.gltf" 
+                  animation-mixer="loop:pingpong; duration:1; clampWhenFinished:true" 
+                  position="0.200 -2.889 0.889" 
+                  rotation="0 -90" 
+                  scale="2 2 2"
+                  arm-animated
+                  arm-settings
+                  arm-configuration
+                  >
+        <a-cylinder id="glassObject" visible="" color="cyan" material="side: double" open-ended="false" rotation="" position="-0.690 1.482 0.237" scale="0.030 0.025 0.030" geometry=""></a-cylinder>
+       </a-entity>-->
+      <!-- OBJEKTY ktore sa budu pri jednotlivych animaciach spustat s rukou, 
+          budu bud visible alebo unvisible podla animacie -->
+  
+      <!--CELE RAMENO-->
+       
+      </a-entity>
+       <!-- S.J. start -->
+        <!--gltf-model="https://cdn.glitch.com/27b68365-ab29-4f7a-bac4-e46bb9238d99%2Fkey.glb?v=1610127572698" -->
+       <a-entity id="armKey" 
+                 gltf-model="https://cdn.glitch.com/27b68365-ab29-4f7a-bac4-e46bb9238d99%2FkeyWhite.glb?v=1613225916002" 
+                 position="0 -1.18 1.04" 
+                 rotation="92.3 0.8 81.55"
+                 scale="1 1 1"
+                 visible="true"
+                 arm-animated
+                 arm-settings
+                 arm-configuration></a-entity>
+        
+       <a-entity id="arm" 
+                 gltf-model="https://cdn.glitch.com/27b68365-ab29-4f7a-bac4-e46bb9238d99%2FupDown9.glb?v=1607536641486" 
+                 position="0 -1.18 1.04" 
+                 rotation="92.3 0.8 81.55"
+                 scale="1 1 1"
+                 visible="false"
+                 arm-animated
+                 arm-settings
+                 arm-configuration></a-entity>
+        
+       <a-entity id="armCubes" 
+                 gltf-model="https://cdn.glitch.com/27b68365-ab29-4f7a-bac4-e46bb9238d99%2Fcubes.glb?v=1610128143602" 
+                 position="0 -1.18 1.04" 
+                 rotation="92.3 0.8 81.55"
+                 scale="1 1 1"
+                 visible="false"
+                 arm-animated
+                 arm-settings
+                 arm-configuration></a-entity>
+        
+       <a-entity id="armGlass" 
+                 gltf-model="https://cdn.glitch.com/27b68365-ab29-4f7a-bac4-e46bb9238d99%2Fglass.glb?v=1610106205246" 
+                 position="0 -1.18 1.04" 
+                 rotation="92.3 0.8 81.55"
+                 scale="1 1 1"
+                 visible="false"
+                 arm-animated
+                 arm-settings
+                 arm-configuration></a-entity>
+                <!--rotation="92.3 0.8 81.55" -->
+      <!-- S.J. end -->
+        
+      <!-- CLANKY prstov od ruky clanok 1, potom 2 potom 3 atd -->
+      
+<!--      <a-box color="tomato" depth="2" height="4" width="0.5"></a-box> -->
+<a-text id="infotext" value="-" lirkis-text-component=""  position="-0.89703 0.90176 -0.38352" rotation="-35.348058212801014 0 0" color="red" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" 
+        scale="" visible="true"></a-text>      
+      
+    <a-entity light="color: #ffffff; intensity: 1.5; type: ambient;" visible=""></a-entity>
+
+
+    <a-entity light="type: spot; castShadow:false; penumbra:1.000; color: #bde6f2 ; angle: 90; intensity: 1.820; distance: 50; decay: 2.0; shadowMapHeight: 180; shadowMapWidth:180"
+            position="-0.469 1.784 0.835" rotation="-56.242 90.000 -90.000"></a-entity>
+      
+   <!--<a-entity light="type: spot; castShadow:true; penumbra:1.000; color: #8ed1e8 ; angle: 46.290; intensity: 4.910; distance: 50; decay: 2.0; shadowMapHeight: 2048; shadowMapWidth:2048"
+            position="-2.177 0.742 2.424" rotation="-26.155 -44.907 -92.111"></a-entity> -->
+      <a-obj-model id="deskObj" static-body="" 
+                   src="https://raw.githubusercontent.com/mayorian/glitchproject/master/desk/desk.obj" 
+                   mtl="https://raw.githubusercontent.com/mayorian/glitchproject/master/desk/desk.mtl" 
+                   scale="0.1 0.13 0.116" position="-0.415 0.437 -0.009" rotation="" material="" obj-model="">
+      </a-obj-model>
+      
+      <a-sky color="black"></a-sky>
+     <a-sky src="#sky4" scale="0.2 0.2 0.2" rotation="0 245 0"></a-sky>
+      
+    </a-scene>
+  
+    
+    <script>
+    //  NAF.schemas.add({
+     //   template: '#avatar-template',
+     //   components: [
+      //    'position',
+      //    'rotation',
+      //    {
+      //      selector: '.head',
+      //      component: 'material',
+      //      property: 'color'
+      //    },
+      //    {
+      //      selector: '.idtext',
+      //      component: 'text',
+      //      property: 'value'
+      //    },
+      //  ]
+     // }); 
+    </script>
+<!--     </div> -->
+   
+    <script type="text/javascript">
+      //query selectory na 3D objekty - 3d text, 3d ruka, oculus 3d controller
+      var infotextSelector = document.querySelector('#infotext');
+      var armEntity = document.querySelector('#armEntity');
+      var arm = document.querySelector('#arm');
+      var armKey = document.querySelector('#armKey');
+      var armGlass = document.querySelector('#armGlass');
+      var armCubes = document.querySelector('#armCubes');
+      var controllerOculus = document.querySelector('#rhand');
+      var currentHand;
+      
+      var timeout = null;
+      var counter = 8;
+      var duration = 20, pause = 10;
+      var isPaused = false;
+      var number;
+      var stop;
+      
+      //soketove rozhranie pre prijimanie sprav cez server od Experimentatora 
+     var socket = io();
+    $(function () {
+      socket.on('message', function(msg) {
+        //$("#myTextarea").text(msg);
+       // $('#messages').scrollTop($('#messages').prop("scrollHeight"));
+       // document.getElementById("myTextarea").value =  $('#messages').text(msg); 
+        console.error(msg);
+       // infotextSelector.setAttribute('value', msg);
+        
+        //Cez soket pride sprava, ktora nasledne spusti event, tieto eventy su implementovane v skripte js/VRarmComponents.js
+        //eventy pre komponent arm-animated - tento event spusti animaciu
+        
+        function nextAnimation(){
+          counter--;
+          switch(Math.floor(Math.random() * 3)) {
+            case 0: // startAnimationKey 
+              msg = "startAnimationKey";
+              socket.emit('countDown', counter);
+              console.log("Key " + counter);
+              currentHand = armKey;
+              arm.emit("hide", {}, false);
+              armKey.emit("show", {}, false);
+              armCubes.emit("hide", {}, false);
+              armGlass.emit("hide", {}, false);
+              break;
+            case 1: // startAnimationGlass 
+              msg = "startAnimationGlass";
+              socket.emit('countDown', counter);
+              console.log("Glass " + counter);
+              currentHand = armGlass;
+              arm.emit("hide", {}, false);
+              armKey.emit("hide", {}, false);
+              armCubes.emit("hide", {}, false);
+              armGlass.emit("show", {}, false);
+              break;
+            case 2: // startAnimationCube 
+              msg = "startAnimationCube";
+              socket.emit('countDown', counter); 
+              console.log("Cube " + counter); 
+              currentHand = armCubes;
+              arm.emit("hide", {}, false);
+              armKey.emit("hide", {}, false);
+              armCubes.emit("show", {}, false);
+              armGlass.emit("hide", {}, false);
+          }
+          msg="E01"
+        }
+        if(msg == "move"){
+          if(!isPaused){
+            stop = true;  
+            console.log(stop);
+            clearTimeout(timeout);
+            currentHand.emit("move", {training: socket}, false);
+            timeout = null;
+          }
+          msg="E01"
+        }
+        
+        if(msg.start == true){
+          console.log(msg);
+          stop = false;
+          counter = msg.counter;
+          duration = msg.duration;
+          pause = msg.pause;
+          if(counter <= 0 || duration <= 0 || pause <= 0){
+            counter = 0;
+            reset();
+          } else {
+            counter++;
+            sequence();
+          }
+          msg="E01"  
+        }
+        
+        if(msg == 'animationDone'){
+          currentHand.emit("reset", {training: socket}, false);
+          if(stop){
+            stop = false;
+            if(counter > 0){
+              pauseSeq();
+            }
+          }
+          msg="E01"  
+        }
+
+        function sequence(){
+          if(counter > 0 && !stop){
+            isPaused = false;
+            nextAnimation();
+            console.log(pause);
+            timeout = setTimeout(() => {
+              pauseSeq()
+            }, duration * 1000);            
+          }
+          if(counter <= 0 || stop)
+            reset();
+        }
+        
+        function pauseSeq(){
+          if(counter > 0 && !stop){
+            isPaused = true;
+            arm.emit("show", {}, false);
+            armKey.emit("hide", {}, false);
+            armCubes.emit("hide", {}, false);
+            armGlass.emit("hide", {}, false);
+            setTimeout(() => {
+              sequence()
+            }, pause * 1000);     
+          }
+          if(counter <= 0 || stop)
+            reset();
+        }
+        
+        if(msg == "reset"){
+          counter = 0;
+          reset();
+          msg="E01"  
+        }
+        
+        function reset(){
+          if(stop)
+            currentHand.emit("stop", {}, false);
+          console.log("reset");
+          arm.emit("show", {}, false);
+          armKey.emit("hide", {}, false);
+          armCubes.emit("hide", {}, false);
+          armGlass.emit("hide", {}, false);
+          if(counter == 0 & msg != "reset"){
+            socket.emit('message', "stopSequence");
+          }
+          msg="E01"          
+        }
+        
+        //eventy pre komponent arm-settings - posun ruky, skalovanie, centrovanie
+        if(msg == "movefront"){armEntity.emit(msg, {}, false); msg="E01"}
+        if(msg == "moveback"){armEntity.emit(msg, {}, false); msg="E01"}
+        if(msg == "moveleft"){armEntity.emit(msg, {}, false); msg="E01"}
+        if(msg == "moveright"){armEntity.emit(msg, {}, false); msg="E01"}
+        
+        if(msg == "moveup"){armEntity.emit(msg, {}, false); msg="E01"}
+        if(msg == "movedown"){armEntity.emit(msg, {}, false); msg="E01"}
+        if(msg == "scaleup"){armEntity.emit(msg, {}, false); msg="E01"}
+        if(msg == "scaledown"){armEntity.emit(msg, {}, false); msg="E01"}
+        if(msg == "centerArm"){armEntity.emit(msg, {}, false); msg="E01"}
+        
+        //skryvanie a zobrazovanie modelu kontroleru pravej ruky
+        if(msg == "convisible"){controllerOculus.setAttribute('visible', true);}
+        if(msg == "conunvisible"){controllerOculus.setAttribute('visible', false);}
+        
+        //event pre zaslanie informacii o pozicii ruky na server - configuration data - zalsanie konfiguracie
+        //najprv je prijaty event cez websocket, potom event emitne event nad modelom ruky v komponente arm-confoguration 
+        //potom komponent arm-configuration posle http post na server s json - pozicia, skalovanie, 
+        //tieto eventy v subore public/js/VRarmComponents.js spustia HTTP request metody 
+        if(msg == "PostConfigToServer"){armEntity.emit(msg, {}, false); msg="E01"}
+        if(msg == "GetConfigFromServer"){armEntity.emit(msg, {}, false); msg="E01"}
+        
+        //3D textove rozhranie vo virtualnom prostredi
+        //zobrazenie spravy uchop
+        if(msg == "uchop"){
+       //   infotextSelector. setAttribute("text", {value: 'Uchop'}); 
+           setTimeout(function() {
+            infotextSelector.setAttribute("text", {value: 'Uchop'}); 
+          }, 10);
+          setTimeout(function() {
+            infotextSelector.setAttribute("text", {value: '.'}); 
+          }, 3000);
+         }
+        
+      });
+    });
+      
+      const loader = new THREE.GLTFLoader();
+      
+      loader.load("https://cdn.glitch.com/27b68365-ab29-4f7a-bac4-e46bb9238d99%2FordinaryCubegltfBaked.gltf?v=1612011554041", (gltf) => {
+        console.log(gltf);
+        const scene = gltf.scene || gltf.scenes[0];
+        const clips = gltf.animations || [];
+        
+      });
+      
+    </script>
+    
+<!--     <div id="messages"></div>
+    <input id="input" placeholder="Your Message...">
+    <textarea id="myTextarea" name="myTextarea" rows="2" cols="50">asas</textarea>
+ -->
+  </body>
+</html>

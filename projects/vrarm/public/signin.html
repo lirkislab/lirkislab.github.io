@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>   
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <!--     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.0/materia/bootstrap.min.css"  crossorigin="anonymous"> -->
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.0/materia/bootstrap.min.css" crossorigin="anonymous"/>
+    
+    <title>VR Arm</title>
+  </head>
+  <body>
+    
+    <!-- Jumbotron -->
+    <div class="jumbotron" style="height:180px">
+      <h1 class="display-4">VRarm</h1>
+      <p class="display-5" style="height:20px">Rehabilitačný softvér 3D ruky v plne imerzívnej virtuálnej realite</p>
+    </div>
+
+       
+   <div class="card">
+      <div class="card-body mx-auto">
+        Prihlásenie sa do rozhrania experimentátora.
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">Heslo : </span>
+            </div>
+            <input type="password" id="directaccess" class="form-control" placeholder="Sem napíšte heslo" aria-label="Username" aria-describedby="basic-addon1" required>
+        </div>
+
+      </div>
+     <button type="button" class="btn btn-primary" onclick="directaccess()">Prihlásiť sa</button>
+  </div>
+
+    <p></p>
+    
+    <footer class="container">
+<!--         <p class="float-right"><a href="#">Back to top</a></p> -->
+      <div class="container mx-auto">
+        <p>© 2020, Provided by LIRKIS Laboratory· <a href="http://lirkis.kpi.fei.tuke.sk/sk/">LIRKIS Website</a> </p>
+      </div>
+    </footer>
+    
+    <script type="text/javascript">
+      
+      var socket = io(); 
+      $(function () {
+          
+        $('#directaccess').focus();
+      
+    });
+      
+      //redirect klienta po prihlaseni serverom
+      function directaccess(){
+        //monitors the msg emmited from server
+        socket.emit('message', $('#directaccess').val());  
+        socket.on('message', function(msg) {
+          console.error(msg);
+        //finding the vrarm string code
+            var accessString = msg.search("vrarm");
+            //console.error(nStart);
+            if(accessString == 8)
+                document.location.assign (msg);
+      });
+      }
+    </script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+  </body>
+</html>
