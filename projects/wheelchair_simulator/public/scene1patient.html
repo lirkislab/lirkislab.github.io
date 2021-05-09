@@ -1,0 +1,636 @@
+<!-- Modely prevzaté z : https://samgauths.itch.io/lowpol
+                         https://rigmodels.com/model.php?view=Taxi_Low-poly-3d-model__7H9TZZ6TZNZI7S1P9GOKR2JKO
+                         https://rigmodels.com/model.php?view=model__5F358VDCRF1UEVSOZ9JJ2DQBZ&y
+ + STANDARDNA SADA MODELOV POSKYTNUTA LIRKIS G-CVE -->
+<html>
+ <head>
+    <meta charset="utf-8">
+    <title>LIRKIS G-CVE VR platform</title>
+    <meta name="description" content="LIRKIS G-CVE edu project">
+     <!--AFRAME release + extras with dynamic functionality----------------------------------------------------------------->
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>  
+    <!--SUPERHANDS SCRIPT--------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script>
+    <!-- AFRAME EXTRAS components------------------------------------------------------------------------------------------->
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <!-- NETWORKED AFRAME -------------------------------------------------------------------------------------------------->    
+    <script src="https://unpkg.com/networked-aframe@^0.7.1/dist/networked-aframe.min.js"></script>  
+    <!--PHYSICS SYSTEM------------------------------------------------------------------------------------------------------>
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.1.1/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script>
+    <!--COMMUNICATION MODULES----------------------------------------------------------------------------------------------->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script> 
+    <!--OTHER SCRIPTS------------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>
+    <script src="js/wheelchair_components.js"></script>
+    <script src="js/body_rot.js"></script>
+
+
+   
+   
+    <!--CAM KINEMATICS COMPONENT-------------------------------------------------------------------------------------------->
+    <script src="https://rawgit.com/urish/aframe-camera-events/master/index.js"></script>   
+</head>
+  
+<body>
+    <a-scene 
+      physics
+      networked-scene="
+      room: scene1;
+      debug: true;"
+      stats
+      >
+<!--- A-FRAME SCENE ----------------------------------------------------------------------------------------------------->
+<!-- ASSETS INCLUDING ITEMS, MATERIAL, 3D OBJETS, SOURCES AND MIXINS, which are used to build 3D virtual environment --->      
+  <a-assets timeout="15000">
+<!-- Pathss of attached models -  stored on github ------------------------------------------------------------------------>
+              <a-asset-item id="hmd-obj" src="dist/head.obj"></a-asset-item>
+              <a-asset-item id="hmd-mtl" src="dist/head.mtl"></a-asset-item> 
+    
+              <a-asset-item id="quest-right" src="dist/controller/quest-right.obj"></a-asset-item>
+              <a-asset-item id="quest-left" src="dist/controller/quest-left.obj"></a-asset-item>
+    
+              <a-asset-item id="wheelchair-obj" src="wheelchairmodel/wh01baked.obj"></a-asset-item>
+              <a-asset-item id="wheelchair-mtl" src="wheelchairmodel/wh01baked.mtl"></a-asset-item>
+    
+              <a-asset-item id="wheelchair-person-obj" src="avatar-body/lowPolyHumanWheelchair.obj"></a-asset-item>
+              <a-asset-item id="visitor-obj" src="avatar-body/lowPolyHuman.obj"></a-asset-item>
+    
+    
+              <img id="wall" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2FbrickWallWarm.jpg?v=1618274401678" crossorigin="anonymous"/>
+              <img id="glass" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2Fglass.jpg?v=1617405680097" crossorigin="anonymous"/>
+              <img id="ground" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2FwarmFloor.jpg?v=1618272386576" crossorigin="anonymous"/>
+              <img id="ceiling" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2Fceiling.jpeg?v=1617406580705" crossorigin="anonymous"/>
+              <img id="stairs" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2Fstairs.png?v=1617467414500" crossorigin="anonymous"/>
+              <img id="elevatorFloor" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2FelevatorFloor.jpg?v=1618275218030" crossorigin="anonymous"/>
+              <img id="elevatorWall" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2FelevatorWall.jpg?v=1618275218291" crossorigin="anonymous"/>
+              <img id="elevatorCeiling" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2FelevatorCeiling.jpg?v=1618275683452" crossorigin="anonymous"/>
+              <img id="elevatorDoor" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2FelevatorDoor.jpg?v=1618276723285" crossorigin="anonymous"/>
+              <img id="elevatorPanel" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2FelevatorPanel.jpeg?v=1618277393613" crossorigin="anonymous"/>
+
+              <img id="grid1" src="dist/imgs/Grid1m01.png" crossorigin="anonymous" />
+    
+              <img id="skybox" src="dist/imgs/skybox.jpg" crossorigin="anonymous" />
+        
+<!-- Templates - objects utilized in AVATAR MODEL construction ------------------------------------------------------------------------>  
+              <template id="avatar-template">
+                    <a-entity class="avatar">
+                            <a-entity position="0 0 0">
+                                <a-obj-model src="#hmd-obj" color="black" scale="0.375 0.375 0.375" position="0 0 0">
+                                </a-obj-model>
+                                <a-sphere class="head" color="#A0A0B2" scale="0.15 0.15 0.15" position="0 -0.03 0"></a-sphere> 
+                                <a-entity class="rayhead" id="raycasterPatient" cursor raycaster="objects: .clickable; showLine: true; far: 500" line="color: white; opacity: 1" position="0 0 0" visible="true"></a-entity>       
+                           </a-entity>
+                      </a-entity>  
+              </template>
+
+              <!-- oculus controllers templates------>
+              <template id="hand-template-left">
+                <a-entity>
+                  <a-obj-model src="#quest-left" color="black">
+                  </a-obj-model>
+                </a-entity>
+              </template>
+    
+              <template id="hand-template-right">
+                <a-entity>
+                  <a-obj-model src="#quest-right" color="black">
+                  </a-obj-model>
+                </a-entity>
+              </template>
+
+              <!-- wheelchair template------>
+              <template id="wheelchair-template">
+                <a-entity>
+                  <a-obj-model src="#wheelchair-obj" mtl="#wheelchair-mtl" scale="0.15 0.15 0.15"
+                               rotation="0 180 0" position="0.14 0.287 0"
+                               visible="false"></a-obj-model>
+                </a-entity>
+              </template>
+    
+              <!-- wheelchair human body template------>
+              <template id="wheelchair-human-body-template">
+                <a-entity>   
+                    <a-obj-model src="#wheelchair-person-obj" 
+                                 scale="0.135 0.135 0.135" 
+                                 rotation="0 180 0" 
+                                 position="0 -0.1 0" 
+                                 material="color: #D3D3D3"
+                                 visible="false"
+                                 ></a-obj-model>
+                  </a-entity>
+              </template>
+    
+    
+              <!-- wheelchair VR head corrector template ---->
+              <template id="playerhead-vr-template">
+                <a-entity>   
+                </a-entity>
+              </template>
+    
+    
+              <!-- visitor body template------>
+              <template id="visitor-body-template">
+                <a-entity>
+                  <a-obj-model src="#visitor-obj" scale="0.6 0.6 0.6" position="0 0.777 0" material="color: #D3D3D3" visible="false"></a-obj-model>
+                </a-entity>
+              </template>
+              <template id="visitor-body-abstract-template">
+                <a-entity>
+                  <a-obj-model src="#visitor-obj" 
+                               scale="0.6 0.6 0.6" 
+                               position="0 0.777 0"
+                               rotation="0 180 0"
+                               material="color: #D3D3D3"></a-obj-model>
+                </a-entity>
+              </template>
+
+    
+              <template id="wheelchair-abstract-template">
+                <a-entity>
+                  <a-entity rotation="0 0 0">
+                      <a-obj-model src="#wheelchair-obj" 
+                                   mtl="#wheelchair-mtl" 
+                                   scale="0.15 0.15 0.15"
+                                   rotation="0 180 0" 
+                                   position="0.14 0.287 -0.1">
+                      </a-obj-model>
+                  </a-entity>
+                </a-entity>
+              </template>
+    
+              <template id="wheelchair-human-body-abstract-template">
+                <a-entity>  
+                  <a-entity rotation="0 0 0">
+                      <a-obj-model src="#wheelchair-person-obj" 
+                                     scale="0.135 0.135 0.135" 
+                                     rotation="0 180 0" 
+                                     position="0 -0.1 -0.1" 
+                                     material="color: #D3D3D3">
+                      </a-obj-model>
+                  </a-entity>
+                </a-entity>
+              </template>
+    
+  </a-assets> 
+<!-- /END OF ASSETS---------------------------------------------------------------------------------------------------->
+
+<!--SHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      <!-- AVATAR BODY ------------->
+      <a-entity id="fullbody"> 
+         <a-entity   
+                    id="rig"      
+                    networked="template:#wheelchair-template;attachTemplateToLocal:false;"      
+                    position="1.75 0 4"
+                    rotation="0 0 0"
+                    gaze-interaction
+                    kinematic-body="radius: 0.75"
+                    movement-controls="enabled: true; speed: 0.15"
+                    wheelchair
+                    >
+                    <a-entity id="avatar-body"
+                              networked="template:#wheelchair-human-body-template;attachTemplateToLocal:false;"
+                              >
+                              <a-entity id="playerheadCorrector"
+                                        networked="template:#playerhead-vr-template; attachTemplateToLocal: false"
+                                        position="0 1.4 0"
+                                        >
+                                        <a-entity
+                                                id="playerhead"
+                                                networked="template:#avatar-template;attachTemplateToLocal:false;"  
+                                                camera 
+                                                position="0 0 0"
+                                                rotation="0 0 0"
+                                                look-controls="pointerLockEnabled:false"          
+                                                >                  
+                                                <!--END OF 3D CURSOR IMPLEMENTATION ------------------------------------------->
+                                                <a-sphere class="head" visible="true" random-color></a-sphere>
+                                                <a-entity class="rayhead" cursor raycaster="objects: .clickable; showLine: true; far: 500" line="color: white; opacity: 1" position="0 0 0" visible="false"></a-entity> 
+                                                <a-entity cursor="fuse: true; fuseTimeout: 500" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: black; shader: flat" position="0 0 -1"></a-entity> 
+                                        </a-entity>
+                                        <a-entity id="leftController" visible="false" position="0 -70 0" oculus-touch-controls="hand: left;" networked="template:#hand-template-left;" thumbstick-logging></a-entity>
+                                        <a-entity id="rightController" visible="false" position="0 -70 0" aoculus-touch-controls="hand: right;" networked="template:#hand-template-right;" thumbstick-logging></a-entity>
+                                </a-entity>
+                   </a-entity>                
+         </a-entity> 
+          <a-entity id="bodymodel"
+                     networked="template:#wheelchair-abstract-template;attachTemplateToLocal:true;"      
+                     position="-3.5 0 1.75"
+                     rotation="0 0 0"
+                     set-rotation
+                     set-position
+                     > 
+                     <a-entity id="avatar-body-abstract"
+                                networked="template:#wheelchair-human-body-abstract-template;attachTemplateToLocal:false;">
+                     </a-entity>
+           </a-entity>
+      </a-entity>
+      <!-- END OF AVATAR BODY ------------->
+      
+      
+      
+<!-- END OFSHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      
+ <!-- NETWORKED AFRAME SCHEMES NAF including shared template and its property---------------------------------------------->   
+      <script>
+        NAF.schemas.add({
+        template: '#avatar-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.head',
+            component: 'material',
+            property: 'color'
+          },
+        ]
+      });
+        NAF.schemas.add({
+        template: '#wheelchair-abstract-template',
+        components: [
+          'position',
+          'rotation',
+          'scale',
+        ]
+      });
+        NAF.schemas.add({
+        template: '#wheelchair-human-body-abstract-template',
+        components: [
+          'position',
+          'rotation',
+          'scale',
+        ]
+      });
+        NAF.schemas.add({
+        template: '#playerhead-vr-template',
+        components: [
+          'position',
+          'rotation',
+        ]
+      });
+        NAF.schemas.add({
+        template: '#hand-template-left',
+        components: [
+          'position',
+          'rotation',
+        ]
+      });
+        NAF.schemas.add({
+        template: '#hand-template-right',
+        components: [
+          'position',
+          'rotation',
+        ]
+      });
+    </script>
+      
+<!-- LOCAL ENVIRONMENT OBJECTS------------------------------------------------------------------------------------------------------>   
+  <a-entity rotation="0 90 0">
+      <!--GROUND----------------->
+      <a-plane geometry="height: 8; width: 7" 
+               material="src: #ground; ; color: #c0c0c0; repeat: 1.75 2" 
+               position="0 0 -1" rotation="-90 0 0" static-body id="ground_base">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 2.6" 
+               material="src: #ground;color: #c0c0c0; repeat: 0.65 0.75" 
+               position="4.8 0 -1.5" rotation="-90 0 0" static-body id="ground_stairscase_down">
+      </a-plane>
+      <a-plane geometry="height: 2.5; width: 1" 
+               material="src: #ground; color: #c0c0c0; repeat: 0.25 0.625" 
+               position="-4 0 1.75" rotation="-90 0 0" static-body id="ground_wheelchair">
+      </a-plane>
+      <a-plane geometry="height: 6; width: 2.4" 
+               material="src: #ground; color: #c0c0c0; repeat: 0.6 1.5" 
+               position="2.3 0 6" rotation="-90 0 0" static-body id="ground_hallway">
+      </a-plane>        
+      <a-plane geometry="height: 3; width: 2.6" 
+               material="src: #ground; color: #c0c0c0; repeat: 0.65 0.75" 
+               position="4.8 0 7.5" rotation="-90 0 0" static-body id="ground_elevator">
+      </a-plane>
+      
+      <a-plane geometry="height: 24; width: 24" 
+               material="src: #ground; color: #c0c0c0; repeat: 6 6" 
+               position="0 -5 -1" rotation="-90 0 0" static-body id="ground_base_downstairs">
+      </a-plane>
+      <a-plane geometry="height: 15; width: 2" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 0.4285714285714285 4.5"
+               position="3.5 2.5 10" rotation="0 90 0" static-body id="elevator_wall_1">
+      </a-plane>
+      <a-plane geometry="height: 15; width: 2.6" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 0.5571428571428571 4.5"
+               position="4.8 2.5 11" rotation="0 180 0" static-body id="elevator_wall_2">
+      </a-plane>
+      
+      <!--STAIRS------------------>
+      
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 -0.2 0.24" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 -0.6 0.72" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 -1 1.2" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 -1.4 1.68" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 -1.8 2.16" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 -2.2 2.64" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 -2.6 3.12" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 -3 3.6" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 -3.4 4.08" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 -3.8 4.56" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 -4.2 5.04" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 -4.6 5.52" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 -5 6" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 4.8 0.24" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 4.4 0.72" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 4 1.2" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 3.6.4 1.68" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 3.2.8 2.16" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 2.8 2.64" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 2.4.6 3.12" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 2 3.6" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 1.6.4 4.08" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 1.2.8 4.56" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 0.8.2 5.04" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 0.4.6 5.52" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 0 6" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+      
+      <a-box width="1" height="1" depth="1" scale="0.48 2.6 0.4" position="4.80 5 6" rotation="90 90 0" static-body
+             material="src: #stairs; side: double; color: #c0c0c0; repeat: 0.3 0.8" 
+             ></a-box>
+
+      
+      
+      <!--CEILING----------------->
+      <a-plane geometry="height: 8; width: 7" 
+               material="src: #ceiling; side: double; color: #c0c0c0; repeat: 3.5 4" 
+               position="0 5 -1" rotation="-90 0 0" static-body id="ceiling_base">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 2.6" 
+               material="src: #ceiling; side: double; color: #c0c0c0; repeat: 1.3 1.5" 
+               position="4.8 5 -1.5" rotation="-90 0 0" static-body id="ceiling_stairs_down">
+      </a-plane>
+      <a-plane geometry="height: 2.5; width: 1" 
+               material="src: #ceiling; side: double; color: #c0c0c0; repeat: 1 1.25" 
+               position="-4 5 1.75" rotation="-90 0 0" static-body id="ceiling_wheelchair">
+      </a-plane>
+      <a-plane geometry="height: 2.4; width: 6" 
+               material="src: #ceiling; side: double; color: #c0c0c0; repeat: 3 1.2" 
+               position="2.3 5 6" rotation="-90 90 0" static-body id="ceiling_stairs_up">
+      </a-plane>        
+      <a-plane geometry="height: 5; width: 2.6" 
+               material="src: #ceiling; side: double; color: #c0c0c0; repeat: 1.3 2.5" 
+               position="4.8 5 8.5" rotation="-90 0 0" static-body id="ceiling_elevator">
+      </a-plane>
+      
+      <a-plane geometry="height: 24; width: 24" 
+               material="src: #ceiling; side: double; color: #c0c0c0; repeat: 12 12" 
+               position="0 10 -1" rotation="-90 0 0" static-body id="ceiling_upstairs">
+      </a-plane>
+      
+      <!--WALL----------------->
+      <a-plane geometry="height: 15; width: 14" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 3 4.5"
+               position="6.1 2.5 4" rotation="0 90 0" static-body id="stair_wall">
+      </a-plane>
+      <a-plane geometry="height: 15; width: 2.6" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 0.5571428571428571 4.5"
+               position="4.8 2.5 -3" rotation="0 180 0" static-body id="downstairs_wall">
+      </a-plane>
+      <a-plane geometry="height: 15; width: 2.6" 
+               material="side: double; color: #c0c0c0;visible: false"
+               position="4.8 2.5 0" rotation="0 180 0" static-body id="downstairs_invisible_wall">
+      </a-plane>
+      <a-plane geometry="height: 15; width: 2.6" 
+               material="side: double; color: #c0c0c0;visible: false"
+               position="4.8 2.5 6" rotation="0 180 0" static-body id="upstairs_invisible_wall2">
+      </a-plane>
+      
+      
+      <a-plane geometry="height: 15; width: 2" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 0.4285714285714285 4.5"
+               position="3.5 2.5 -4" rotation="0 90 0" static-body id="menu_wall_1">
+      </a-plane>
+      <a-plane geometry="height: 15; width: 7" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 1.5 4.5"
+               position="0 2.5 -5" rotation="0 180 0" static-body id="menu_wall_2">
+      </a-plane>
+      <a-plane geometry="height: 15; width: 5.5" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 1.178571428571428 4.5"
+               position="-3.5 2.5 -2.25" rotation="0 90 0" static-body id="menu_wall_3">
+      </a-plane>
+      
+      <a-plane geometry="height: 15; width: 1" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 0.2142857142857143 4.5"
+               position="-4.0 2.5 0.5" rotation="0 180 0" static-body id="wheelchair_wall_1">
+      </a-plane>
+      <a-plane geometry="height: 15; width: 2.5" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 0.5357142857142857 4.5"
+               position="-4.5 2.5 1.75" rotation="0 90 0" static-body id="wheelchair_wall_2">
+      </a-plane>
+      <a-plane geometry="height: 15; width: 5.6" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 1.2 4.5"
+               position="-1.7 2.5 3" rotation="0 180 0" static-body id="wheelchair_wall_3">
+      </a-plane>
+      
+      <a-plane geometry="height: 15; width: 6" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 1.285714285714286 4.5"
+               position="1.1 2.5 6" rotation="0 90 0" static-body id="hallway_wall_1">
+      </a-plane>
+      <a-plane geometry="height: 15; width: 2.4" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 0.5142857142857142 4.5"
+               position="2.3 2.5 9" rotation="0 180 0" static-body id="hallway_wall_2">
+      </a-plane>
+   
+      <!--GLASS PANES---------->
+      <a-plane geometry="height: 20; width: 5" 
+                material="src: #glass; side: double; color: #c0c0c0; repeat: 1 1; opacity: 0.6;"
+                position="3.49 0 3.0" rotation="0 90 0" static-body id="railway">
+      </a-plane>
+      <a-plane geometry="height: 5; width: 2.6" 
+              material="src: #glass; side: double; color: #c0c0c0; repeat: 1 1; opacity: 0.6;"
+               position="4.8 7.5 6" rotation="0 180 0" static-body id="upstairs_glass_wall">
+      </a-plane>
+      
+      
+      <a-box widwth="1" height="1" depth="1" scale="6 0.18 0.18" position="3.5 0 3" rotation="90 90 0"
+             material="src: #wall; side: double; color: #c0c0c0; repeat: 1.5 0.05"
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="6 0.18 0.18" position="3.5 5 3" rotation="90 90 0"
+            material="src: #wall; side: double; color: #c0c0c0; repeat: 1.5 0.05"
+             ></a-box>
+      <a-box width="1" height="1" depth="1" scale="6 0.18 0.18" position="3.5 -5 3" rotation="90 90 0"
+            material="src: #wall; side: double; color: #c0c0c0; repeat: 1.5 0.05"
+             ></a-box>
+
+      <a-box width="1" height="1" depth="1" scale="0.2 15 1" position="3.5 2.5 0" id="staircase_pillar_1" static-body
+             material="src: #wall; side: double; color: #c0c0c0; repeat: 0.2142857142857143 4.5"
+             >
+      </a-box>
+      <a-box width="1" height="1" depth="1" scale="0.2 15 1" position="3.5 2.5 6" id="staircase_pillar_2" static-body
+             material="src: #wall; side: double; color: #c0c0c0; repeat: 0.2142857142857143 4.5"
+             >
+      </a-box>
+
+      <!-- FLOOR MARKINGS FOR MOVEMENT --->
+      <a-plane geometry="height: 5; width: 0.05" position="-0.35 0.01 1.75"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane>
+      <a-plane geometry="height: 6; width: 0.05" position="2.15 0.01 4.75"
+               material="side: double; color: lime" rotation="-90 0 0"></a-plane>
+      <a-plane geometry="height: 2.65; width: 0.05" position="3.475 0.01 7.75"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane> 
+      <a-plane geometry="height: 1; width: 0.05" position="4.8 0.01 8.25"
+               material="side: double; color: lime" rotation="-90 0 0"></a-plane>
+      <a-triangle color="lime" position="4.8 0.01 8.75" rotation="-90 180 0"></a-triangle>
+      
+      
+      <!--- ELEVATOR ---->
+      <a-plane geometry="height: 2; width: 2.6" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 0.55714 0.6; offset: 0.2 0.005"
+               position="4.8 4 9" rotation="0 180 0" static-body id="elevator_wall_3">
+      </a-plane>
+      <a-box color="#A9A9A9	" width="1" height="1" depth="1" scale="0.2 5 0.2" position="6.05 2.5 9"></a-box>
+      <a-box color="#A9A9A9	" width="1" height="1" depth="1" scale="0.2 5 0.2" position="3.5 2.5 9"></a-box>
+      <a-box color="#A9A9A9	" width="1" height="1" depth="1" scale="3 0.2 0.2" position="4.9 3 9"></a-box>
+      <a-plane geometry="height: 3; width: 2.6" 
+               material="src: #elevatorCeiling; side:double; color: #c0c0c0; repeat: 3 3;" 
+               position="4.8 3 10.5" rotation="-90 0 0" static-body id="elevator_ceiling">
+      </a-plane>
+      <a-plane geometry="height: 2; width: 2.6" 
+               material="src: #elevatorFloor; color: #c0c0c0; repeat: 5 5" 
+               position="4.8 0 10" rotation="-90 0 0" static-body id="ground_elevator_floor">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 2" 
+               material="src: #elevatorWall; side: double; color: #c0c0c0; repeat: 0.29 1"
+               position="3.51 1.5 10" rotation="0 90 0" static-body id="elevator_wall_inside_1">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 2.6" 
+               material="src: #elevatorWall; side: double; color: #c0c0c0; repeat: 0.377 1"
+               position="4.8 1.5 10.99" rotation="0 180 0" static-body id="elevator_wall_inside_2">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 2" 
+               material="src: #elevatorWall; side: double; color: #c0c0c0; repeat: 0.29 1"
+               position="6.09 1.5 10" rotation="0 90 0" static-body id="elevator_wall_inside_3">
+      </a-plane>
+            <a-plane geometry="height: 0.6; width: 0.3" 
+               material="src: #elevatorPanel; side: double; color: #c0c0c0; repeat: 1 1"
+               position="6.08 1.5 9.5" rotation="0 -90 0" static-body id="elevator_panel">
+      </a-plane>
+      
+      
+      
+      <a-plane geometry="height: 3; width: 0.5" 
+               material="src: #elevatorDoor; side: double; color: #c0c0c0; repeat: 0.6 1"
+               position="3.65 1.5 9" rotation="0 180 0" static-body id="elevator_wall_door_1">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 0.5" 
+               material="src: #elevatorDoor; side: double; color: #c0c0c0; repeat: 0.1 1"
+               position="5.9 1.5 9" rotation="0 180 0" static-body id="elevator_wall_door_2">
+      </a-plane>
+
+      
+      
+      <!--- ELEVATOR DOWNSTAIRS ---->
+      <a-plane geometry="height: 2; width: 2.6" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 0.55714 0.6; offset: 0.2 0.005"
+               position="4.8 -1 9" rotation="0 180 0" static-body id="elevator_downstairs_wall_3">
+      </a-plane>
+      <a-box color="#A9A9A9" width="1" height="1" depth="1" scale="0.2 5 0.2" position="6.05 -2.5 9"></a-box>
+      <a-box color="#A9A9A9" width="1" height="1" depth="1" scale="0.2 5 0.2" position="3.5 -2.5 9"></a-box>
+      <a-box color="#A9A9A9" width="1" height="1" depth="1" scale="3 0.2 0.2" position="4.9 -2 9"></a-box>
+      <a-plane geometry="height: 3; width: 2.6" 
+               material="src: #elevatorDoor; side: double; color: #c0c0c0; repeat: 0.7 1"
+               position="4.8 -3.5 9" rotation="0 180 0" static-body id="elevator_downstairs_wall_door_1">
+      </a-plane>
+
+      
+    
+      
+      
+      
+      
+      
+      
+      <a-text value="Staircase down" lirkis-text-component position="5.3 2.5 -1" rotation="0 -90 0" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="1.8 2 1" ></a-text>
+      <a-text value="Staircase Up" lirkis-text-component position="5.3 2.5 7" rotation="0 -90 0" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="1.8 2 1" ></a-text>     
+      <a-text value="Wheelchair" lirkis-text-component position="-4 2.5 1.75" rotation="0 90 0" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="1.8 2 1" ></a-text>
+      <a-text value="Hallway" lirkis-text-component position="2.3 2.5 4" rotation="0 180 0" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="1.8 2 1" ></a-text>                  
+
+      
+    <!--LIGHTS implementation -->
+     <a-entity light="color: #fff; intensity: 0.7; type: ambient;" visible="true"></a-entity> 
+      
+    <!--LIGHTS prototype object -->
+        <a-entity id="lightObject1">
+              <a-box position="0 5.04312 -1.13455" width="1" height="1" depth="1" scale="0.1 0.2 0.5" material="color: #ffffff; emissive: #ffffff" geometry="" id="lightbox1">
+<!--                     <a-entity id="lightsource1" light="color: #ffffff; type: point; decay: 2.5; distance: 15; intensity: 0.69" visible="" position="0 -1.47768 0"></a-entity>             -->
+              </a-box>           
+        </a-entity>
+      
+      <a-entity id="lightObject2">
+              <a-box position="4.75 3.04312 10" width="1" height="1" depth="1" scale="0.1 0.2 0.5" rotation="0 90 0" material="color: #ffffff; emissive: #5eeb34" geometry="" id="lightbox2">
+               
+<!--                 <a-entity id="lightsource2" light="color: #fff59c; type: point; decay: 2.5; distance: 10; intensity: 0.69" visible="" position="0 -1.47768 0"></a-entity>             -->
+              </a-box>           
+        </a-entity>
+      
+      
+      <a-text value="Back to main page" lirkis-text-component position="0 3 -4" rotation="0 0 0" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="2 2 1" ></a-text>
+      <a-entity link="href: index.html; title: My Homepage;">
+              <a-box id="box1" depth="0.6" height="0.6" width="0.6" position="0 2.3 -4" material="src: #grid1"></a-box>
+      </a-entity>
+      
+    <a-sky src="#skybox" rotation="0 90 0"></a-sky> 
+   </a-entity>
+</a-scene>
+  </body>
+</html>

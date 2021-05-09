@@ -1,0 +1,733 @@
+<!-- Modely prevzaté z : https://samgauths.itch.io/lowpol
+                         https://rigmodels.com/model.php?view=Taxi_Low-poly-3d-model__7H9TZZ6TZNZI7S1P9GOKR2JKO
+                         https://rigmodels.com/model.php?view=model__5F358VDCRF1UEVSOZ9JJ2DQBZ&y
+ + STANDARDNA SADA MODELOV POSKYTNUTA LIRKIS G-CVE -->
+<html>
+ <head>
+    <meta charset="utf-8">
+    <title>LIRKIS G-CVE VR platform</title>
+    <meta name="description" content="LIRKIS G-CVE edu project">
+     <!--AFRAME release + extras with dynamic functionality----------------------------------------------------------------->
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>  
+    <!--SUPERHANDS SCRIPT--------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script>
+    <!-- AFRAME EXTRAS components------------------------------------------------------------------------------------------->
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <!-- NETWORKED AFRAME -------------------------------------------------------------------------------------------------->    
+    <script src="https://unpkg.com/networked-aframe@^0.7.1/dist/networked-aframe.min.js"></script>  
+    <!--PHYSICS SYSTEM------------------------------------------------------------------------------------------------------>
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.1.1/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script>
+    <!--COMMUNICATION MODULES----------------------------------------------------------------------------------------------->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script> 
+    <!--<script src="easyrtc/easyrtc.js"></script> -->
+    <!--OTHER SCRIPTS------------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>
+    <script src="js/car_components.js"></script>
+    <script src="js/wheelchair_components.js"></script>
+    <script src="js/body_rot.js"></script>
+    <script src="js/fps_component.js"></script>
+
+   
+    <!--CAM KINEMATICS COMPONENT-------------------------------------------------------------------------------------------->
+    <script src="https://rawgit.com/urish/aframe-camera-events/master/index.js"></script>   
+</head>
+  
+<body>
+    
+<!--- A-FRAME SCENE ----------------------------------------------------------------------------------------------------->
+    <a-scene 
+      physics
+      fog="type: exponential; color: #000; density: 0.15"
+      networked-scene="
+      room: scene5;
+      debug: true;"
+      stats
+      >
+<!-- ASSETS INCLUDING ITEMS, MATERIAL, 3D OBJETS, SOURCES AND MIXINS, which are used to build 3D virtual environment --->      
+  <a-assets timeout="15000">
+<!-- Pathss of attached models -  stored on github ------------------------------------------------------------------------>
+              <a-asset-item id="hmd-obj" src="dist/head.obj"></a-asset-item>
+              <a-asset-item id="hmd-mtl" src="dist/head.mtl"></a-asset-item>
+    
+              <a-asset-item id="car1-obj" src="taxiCar/taxiCar.obj"></a-asset-item>
+              <a-asset-item id="car1-mtl" src="taxiCar/taxiCar.mtl"></a-asset-item>
+              <a-asset-item id="car2-obj" src="policeCar/policeCar.obj"></a-asset-item>
+              <a-asset-item id="car2-mtl" src="policeCar/policeCar.mtl"></a-asset-item>
+    
+              <a-asset-item id="quest-right" src="dist/controller/quest-right.obj"></a-asset-item>
+              <a-asset-item id="quest-left" src="dist/controller/quest-left.obj"></a-asset-item>
+    
+              <a-asset-item id="wheelchair-obj" src="wheelchairmodel/wh01baked.obj"></a-asset-item>
+              <a-asset-item id="wheelchair-mtl" src="wheelchairmodel/wh01baked.mtl"></a-asset-item>
+    
+              <a-asset-item id="wheelchair-person-obj" src="avatar-body/lowPolyHumanWheelchair.obj"></a-asset-item>
+              <a-asset-item id="visitor-obj" src="avatar-body/lowPolyHuman.obj"></a-asset-item>
+    
+              <img id="grid2" src="dist/imgs/Grid1m02.png" crossorigin="anonymous" />
+    
+              <img id="road" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2Froad.jpg?v=1617410378761" crossorigin="anonymous"/>
+              <img id="pavement" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2Fpavement.jpg?v=1617411589128" crossorigin="anonymous"/>
+              <img id="building" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2Fbrick-building.jpg?v=1617412935637" crossorigin="anonymous"/>
+              <img id="wall" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2Fwall_building.jpg?v=1617450971057" crossorigin="anonymous"/>
+
+   
+              <img id="groundTexture" src="dist/imgs/imgplan.png" crossorigin="anonymous" />
+              <img id="skybox" src="dist/imgs/skybox.jpg" crossorigin="anonymous" />
+        
+<!-- Templates - objects utilized in AVATAR MODEL construction ------------------------------------------------------------------------>  
+              <template id="avatar-template">
+                    <a-entity class="avatar">
+                            <a-entity position="0 0 0">
+                                <a-obj-model src="#hmd-obj" color="black" scale="0.375 0.375 0.375" position="0 0 0">
+                                </a-obj-model>
+                                <a-sphere class="head" color="#A0A0B2" scale="0.15 0.15 0.15" position="0 -0.03 0"></a-sphere> 
+                                <a-entity class="rayhead" id="raycasterPatient" cursor raycaster="objects: .clickable; showLine: true; far: 500" line="color: white; opacity: 1" position="0 0 0" visible="true"></a-entity>       
+                           </a-entity>
+                      </a-entity>  
+              </template>
+
+              <!-- oculus controllers templates------>
+              <template id="hand-template-left">
+                <a-entity>
+                  <a-obj-model src="#quest-left" color="black">
+                  </a-obj-model>
+                </a-entity>
+              </template>
+    
+              <template id="hand-template-right">
+                <a-entity>
+                  <a-obj-model src="#quest-right" color="black">
+                  </a-obj-model>
+                </a-entity>
+              </template>
+
+              <!-- wheelchair template------>
+              <template id="wheelchair-template">
+                <a-entity>
+                  <a-obj-model src="#wheelchair-obj" mtl="#wheelchair-mtl" scale="0.15 0.15 0.15"
+                               rotation="0 180 0" position="0.14 0.287 0"
+                               visible="false"></a-obj-model>
+                </a-entity>
+              </template>
+    
+              <!-- wheelchair human body template------>
+              <template id="wheelchair-human-body-template">
+                <a-entity>   
+                    <a-obj-model src="#wheelchair-person-obj" 
+                                 scale="0.135 0.135 0.135" 
+                                 rotation="0 180 0" 
+                                 position="0 -0.1 0" 
+                                 material="color: #D3D3D3"
+                                 visible="false"
+                                 ></a-obj-model>
+                  </a-entity>
+              </template>
+    
+    
+              <!-- wheelchair VR head corrector template ---->
+              <template id="playerhead-vr-template">
+                <a-entity>   
+                </a-entity>
+              </template>
+    
+    
+              <!-- visitor body template------>
+              <template id="visitor-body-template">
+                <a-entity>
+                  <a-obj-model src="#visitor-obj" scale="0.6 0.6 0.6" position="0 0.777 0" material="color: #D3D3D3" visible="false"></a-obj-model>
+                </a-entity>
+              </template>
+              <template id="visitor-body-abstract-template">
+                <a-entity>
+                  <a-obj-model src="#visitor-obj" 
+                               scale="0.6 0.6 0.6" 
+                               position="0 0.777 0" 
+                               rotation="0 90 0"
+                               material="color: #D3D3D3"></a-obj-model>
+                </a-entity>
+              </template>
+
+              <template id="wheelchair-abstract-template">
+                <a-entity>
+                      <a-obj-model src="#wheelchair-obj" 
+                                   mtl="#wheelchair-mtl" 
+                                   scale="0.15 0.15 0.15"
+                                   rotation="0 180 0" 
+                                   position="0.14 0.287 -0.1">
+                      </a-obj-model>
+                </a-entity>
+              </template>
+    
+              <template id="wheelchair-human-body-abstract-template">
+                <a-entity>  
+                      <a-obj-model src="#wheelchair-person-obj" 
+                                     scale="0.135 0.135 0.135" 
+                                     rotation="0 180 0" 
+                                     position="0 -0.1 -0.1" 
+                                     material="color: #D3D3D3">
+                      </a-obj-model>
+                </a-entity>
+              </template>
+    
+              <!--car template------>
+              <template id="car-template-left">
+                <a-entity>
+                        <a-obj-model 
+                              src="#car2-obj"
+                              mtl="#car2-mtl"
+                              scale="2 2 2">
+                        </a-obj-model>
+                </a-entity>
+              </template>
+
+              <template id="car-template-right">
+                <a-entity>
+                        <a-obj-model 
+                              src="#car1-obj"
+                              mtl="#car1-mtl"
+                              scale="2 2 2">
+                        </a-obj-model>
+                </a-entity>
+              </template>
+
+
+              <!--traffic light template------>
+              <template id="traffic-light-template">
+                <a-entity>
+                        <a-box class="traffic-light" width="0.5" height="0.5" depth="0.5"></a-box>
+                </a-entity>
+              </template>
+  </a-assets> 
+<!-- /END OF ASSETS---------------------------------------------------------------------------------------------------->
+
+<!--SHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      <!-- AVATAR BODY ------------->
+      <a-entity id="fullbody"> 
+         <a-entity   
+                    id="rig"      
+                    networked="template:#wheelchair-template;attachTemplateToLocal:false;"      
+                    position="-12.5 0 8.5"
+                    rotation="0 0 0"
+                    gaze-interaction
+                    kinematic-body="radius: 0.75"
+                    movement-controls="enabled: true; speed: 0.15"
+                    wheelchair
+                    fpscount
+                    >
+                    <a-entity id="avatar-body"
+                              networked="template:#wheelchair-human-body-template;attachTemplateToLocal:false;"
+                              >
+                              <a-entity id="playerheadCorrector"
+                                        networked="template:#playerhead-vr-template; attachTemplateToLocal: false"
+                                        position="0 1.4 0"
+                                        >
+                                        <a-entity
+                                                id="playerhead"
+                                                networked="template:#avatar-template;attachTemplateToLocal:false;"  
+                                                camera 
+                                                position="0 0 0"
+                                                rotation="0 180 0"
+                                                look-controls="pointerLockEnabled:false"          
+                                                >                  
+                                                <!--END OF 3D CURSOR IMPLEMENTATION ------------------------------------------->
+                                                <a-sphere class="head" visible="true" random-color></a-sphere>
+                                                <a-entity class="rayhead" cursor raycaster="objects: .clickable; showLine: true; far: 500" line="color: white; opacity: 1" position="0 0 0" visible="false"></a-entity> 
+                                                <a-entity cursor="fuse: true; fuseTimeout: 500" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: black; shader: flat" position="0 0 -1"></a-entity> 
+                                        </a-entity>
+                                        <a-entity id="leftController" visible="false" position="0 -70 0" oculus-touch-controls="hand: left;" networked="template:#hand-template-left;" thumbstick-logging></a-entity>
+                                        <a-entity id="rightController" visible="false" position="0 -70 0" aoculus-touch-controls="hand: right;" networked="template:#hand-template-right;" thumbstick-logging></a-entity>                                </a-entity>
+                   </a-entity>                
+         </a-entity> 
+          <a-entity id="bodymodel"
+                     networked="template:#wheelchair-abstract-template;attachTemplateToLocal:true;"      
+                     position="-12.5 0 8.5"
+                     rotation="0 0 0"
+                     set-rotation
+                     set-position
+                     > 
+                     <a-entity id="avatar-body-abstract"
+                                networked="template:#wheelchair-human-body-abstract-template;attachTemplateToLocal:false;">
+                     </a-entity>
+           </a-entity>
+      </a-entity>
+      <!-- END OF AVATAR BODY ------------->
+      
+      <a-entity 
+                move_second 
+                networked="template:#car-template-left;attachTemplateToLocal:false;"  
+                position="24 0.7 -2"
+                rotation="0 270 0">
+              <a-obj-model 
+                    src="#car2-obj"
+                    mtl="#car2-mtl"
+                    scale="2 2 2">
+              </a-obj-model>
+        
+      </a-entity>
+      
+
+      <a-entity 
+                move 
+                networked="template:#car-template-right;attachTemplateToLocal:false;"
+                position="-24 0.7 2"
+                rotation="0 90 0">
+              <a-obj-model 
+                    src="#car1-obj"
+                    mtl="#car1-mtl"
+                    scale="2 2 2">
+              </a-obj-model>
+      </a-entity>
+      
+      <a-entity 
+                position="1.8 2.25 -4"
+                networked="template:#traffic-light-template;attachTemplateToLocal:false;"
+                >
+          <a-box traffic_light class="traffic-light" width="0.5" height="0.5" depth="0.5"></a-box>
+      </a-entity>
+      
+      
+      <a-entity 
+                position="-1.8 2.25 4"
+                networked="template:#traffic-light-template;attachTemplateToLocal:false;"            
+                >
+          <a-box traffic_light class="traffic-light" width="0.5" height="0.5" depth="0.5"></a-box>
+      </a-entity>
+
+
+<!-- END OFSHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      
+ <!-- NETWORKED AFRAME SCHEMES NAF including shared template and its property---------------------------------------------->   
+      <script>
+        NAF.schemas.add({
+        template: '#avatar-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.head',
+            component: 'material',
+            property: 'color'
+          },
+        ]
+      });
+        NAF.schemas.add({
+        template: '#car-template-right',
+        components: [
+          'position',
+        ]
+      });
+        NAF.schemas.add({
+        template: '#car-template-left',
+        components: [
+          'position',
+        ]
+      });
+        NAF.schemas.add({
+        template: '#traffic-light-template',
+        components: [
+          'position',
+          {
+            selector: '.traffic-light',
+            component: 'material',
+            property: 'color'
+          },
+          {
+            selector: '.traffic-light',
+            component: 'material',
+            property: 'emissive'
+          },
+        ]
+      });
+        NAF.schemas.add({
+        template: '#wheelchair-abstract-template',
+        components: [
+          'position',
+          'rotation',
+          'scale',
+        ]
+      });
+        NAF.schemas.add({
+        template: '#wheelchair-human-body-abstract-template',
+        components: [
+          'position',
+          'rotation',
+          'scale',
+        ]
+      });
+        NAF.schemas.add({
+        template: '#playerhead-vr-template',
+        components: [
+          'position',
+          'rotation',
+        ]
+      });
+        NAF.schemas.add({
+        template: '#hand-template-left',
+        components: [
+          'position',
+          'rotation',
+        ]
+      });
+        NAF.schemas.add({
+        template: '#hand-template-right',
+        components: [
+          'position',
+          'rotation',
+        ]
+      });
+    </script>
+      
+<!-- LOCAL ENVIRONMENT OBJECTs------------------------------------------------------------------------------------------------------>   
+      
+      
+      
+      <!--GROUND-------------->
+      
+      <a-plane geometry="height: 50; width: 14" 
+               material="src: #pavement; side: double; color: #c0c0c0; repeat: 14 50" 
+               position="0 0 -11" rotation="-90 90 0" static-body id="ground_building_1">
+      </a-plane>
+      
+      <a-plane geometry="height: 50; width: 14" 
+               material="src: #pavement; side: double; color: #c0c0c0; repeat: 14 50" 
+               position="0 0 11" rotation="-90 90 0" static-body id="ground_building_2">
+      </a-plane>
+      
+      
+      <!--ROAD + CROSSWALK -------->
+      <a-plane geometry="height: 50; width: 8" 
+               material="src: #road; side: double; color: #c0c0c0; repeat: 4 25" 
+               position="0 -0.1 0" rotation="-90 90 0" static-body id="ground_road">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 0.5" 
+               material="side: double; color: #c0c0c0;" 
+               position="0 -0.09 3.5" rotation="-90 90 0" id="crosswalk_part1">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 0.5" 
+               material="side: double; color: #c0c0c0;" 
+               position="0 -0.09 2.5" rotation="-90 90 0" id="crosswalk_part2">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 0.5" 
+               material="side: double; color: #c0c0c0;" 
+               position="0 -0.09 1.5" rotation="-90 90 0" id="crosswalk_part3">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 0.5" 
+               material="side: double; color: #c0c0c0;" 
+               position="0 -0.09 0.5" rotation="-90 90 0" id="crosswalk_part4">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 0.5" 
+               material="side: double; color: #c0c0c0;" 
+               position="0 -0.09 -0.5" rotation="-90 90 0" id="crosswalk_part5">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 0.5" 
+               material="side: double; color: #c0c0c0;" 
+               position="0 -0.09 -1.5" rotation="-90 90 0" id="crosswalk_part6">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 0.5" 
+               material="side: double; color: #c0c0c0;" 
+               position="0 -0.09 -2.5" rotation="-90 90 0" id="crosswalk_part7">
+      </a-plane>
+      <a-plane geometry="height: 3; width: 0.5" 
+               material="side: double; color: #c0c0c0;" 
+               position="0 -0.09 -3.5" rotation="-90 90 0" id="crosswalk_part8">
+      </a-plane>
+      
+      <!--CROSSWALK LIGHTS-------->
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="2 -0.09 3.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="2 -0.09 2.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="2 -0.09 1.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="2 -0.09 0.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="2 -0.09 -0.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="2 -0.09 -1.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="2 -0.09 -2.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="2 -0.09 -3.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="-2 -0.09 3.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="-2 -0.09 2.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="-2 -0.09 1.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="-2 -0.09 0.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="-2 -0.09 -0.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="-2 -0.09 -1.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="-2 -0.09 -2.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+      <a-circle blink="typeOfDay: night;" visible="false" color="#ffffff" position="-2 -0.09 -3.5" radius="0.1" rotation="-90 0 0" material="emissive: #ffffff"></a-circle>
+
+      
+      <!--MIDDLE LINE------->
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="22 -0.09 0" rotation="-90 90 0" id="middle_line_1">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="19 -0.09 0" rotation="-90 90 0" id="middle_line_2">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="16 -0.09 0" rotation="-90 90 0" id="middle_line_3">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="13 -0.09 0" rotation="-90 90 0" id="middle_line_4">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="10 -0.09 0" rotation="-90 90 0" id="middle_line_5">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="7 -0.09 0" rotation="-90 90 0" id="middle_line_6">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="4 -0.09 0" rotation="-90 90 0" id="middle_line_7">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="-22 -0.09 0" rotation="-90 90 0" id="middle_line_8">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="-19 -0.09 0" rotation="-90 90 0" id="middle_line_9">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="-16 -0.09 0" rotation="-90 90 0" id="middle_line_10">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="-13 -0.09 0" rotation="-90 90 0" id="middle_line_11">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="-10 -0.09 0" rotation="-90 90 0" id="middle_line_12">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="-7 -0.09 0" rotation="-90 90 0" id="middle_line_13">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 0.1" 
+               material="side: double; color: #c0c0c0;" 
+               position="-4 -0.09 0" rotation="-90 90 0" id="middle_line_14">
+      </a-plane>
+      
+      
+      
+      <a-plane geometry="height: 50; width: 0.1" 
+               material="src: #pavement; side: double; color: #c0c0c0; repeat: 0.1 50" 
+               position="0 -0.05 4" rotation="0 0 90" static-body id="ground_road_fill_1">
+      </a-plane>
+      <a-plane geometry="height: 50; width: 0.1" 
+               material="src: #pavement; side: double; color: #c0c0c0; repeat: 0.1 50" 
+               position="0 -0.05 -4" rotation="0 0 90" static-body id="ground_road_fill_2">
+      </a-plane>
+      
+      
+      <!--WALLS-------------->
+
+      <a-plane geometry="height: 12; width: 14" 
+               material="side: double; color: #c0c0c0; repeat: 10 12; visible: false" 
+               position="25 6 0" rotation="0 90 0" static-body id="invisible_wall_1">
+      </a-plane>
+      <a-plane geometry="height: 12; width: 14" 
+               material="side: double; color: #c0c0c0; repeat: 10 12; visible: false" 
+               position="-25 6 0" rotation="0 90 0" static-body id="invisible_wall_2">
+      </a-plane>
+      
+      
+      <!--BUILDINGS-------------->
+
+      
+      <a-entity position="0 6 12" id="building_1">
+              <a-box position="0 1.5 -1" width="1" height="1" depth="1" scale="50 9 8" static-body color="#c0c0c0"
+                     material="src: #building; repeat: 4 0.5"
+                     ></a-box>
+              <a-plane geometry="height: 3; width: 5" 
+               material="src:#wall; side: double; color: #c0c0c0; repeat: 1 1" 
+               position="12.5 -3.05 -3.5" rotation="90 0 0" static-body>
+              </a-plane>
+              <a-plane geometry="height: 3; width: 5" 
+               material="src:#wall; side: double; color: #c0c0c0; repeat: 1 1" 
+               position="-12.5 -3.05 -3.5" rotation="90 0 0" static-body>
+              </a-plane>
+              <a-box 
+                     position="20 -4.5 -1" width="1" height="1" depth="1" scale="10 3 8" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 2 1" ></a-box>
+              <a-box 
+                     position="-5 -4.5 2" width="1" height="1" depth="1" scale="40 3 8" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 8 1" ></a-box>
+              <a-box 
+                     position="-20 -4.5 -1" width="1" height="1" depth="1" scale="10 3 8" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 2 1" ></a-box>
+              <a-box 
+                     position="-5 -4.5 -1" width="1" height="1" depth="1" scale="10 3 8" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 2 1" ></a-box>
+              <a-box 
+                     position="5 -4.5 -1" width="1" height="1" depth="1" scale="10 3 8" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 2 1" ></a-box>
+              <a-box 
+                     rotation="0 0 0"
+                     position="0 0 -5" width="1" height="1" depth="1" scale="0.5 12 0.5" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 0.1 4" ></a-box>
+              <a-box 
+                     rotation="0 0 0"
+                     position="12.5 1.5 -5" width="1" height="1" depth="1" scale="0.5 9 0.5" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 0.1 4" ></a-box>
+              <a-box 
+                     rotation="0 0 0"
+                     position="-12.5 1.5 -5" width="1" height="1" depth="1" scale="0.5 9 0.5" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 0.1 4" ></a-box>
+              <a-box 
+                     rotation="0 0 0"
+                     position="0 -3 -5.01" width="1" height="1" depth="1" scale="50 0.5 0.5" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 10 0.2" ></a-box>
+              <a-box position="12.5 -3 -3.5" rotation="270 0 0" width="1" height="1" depth="1" scale="0.1 0.7 0.2" 
+                     material="color: #ffffff; emissive: #ffffff" geometry="" id="lightbox8">
+<!--                   <a-entity id="lamp8" light="color: #ffffff; type: spot; angle: 60; decay: 1; distance: 20; penumbra: 0.5" 
+                            visible="" position="0 -1.47768 0">
+                  </a-entity>             -->
+              </a-box>
+              <a-box position="-12.5 -3 -3.5" rotation="270 0 0" width="1" height="1" depth="1" scale="0.1 0.7 0.2" 
+                     material="color: #ffffff; emissive: #ffffff" geometry="" id="lightbox9">
+<!--                   <a-entity id="lamp9" light="color: #ffffff; type: spot; angle: 60; decay: 1; distance: 20; penumbra: 0.5" 
+                            visible="" position="0 -1.47768 0">
+                  </a-entity>             -->
+              </a-box>
+
+      </a-entity>
+      
+      
+      <a-entity rotation="0 180 0" position="0 6 -12" id="building_2">
+              <a-box position="0 1.5 -1" width="1" height="1" depth="1" scale="50 9 8" static-body color="#c0c0c0"
+                     material="src: #building; repeat: 4 0.5"
+                     ></a-box>
+              <a-plane geometry="height: 3; width: 5" 
+               material="src:#wall; side: double; color: #c0c0c0; repeat: 1 1" 
+               position="12.5 -3.05 -3.5" rotation="90 0 0" static-body>
+              </a-plane>
+              <a-plane geometry="height: 3; width: 5" 
+               material="src:#wall; side: double; color: #c0c0c0; repeat: 1 1" 
+               position="-12.5 -3.05 -3.5" rotation="90 0 0" static-body>
+              </a-plane>
+              <a-box 
+                     position="20 -4.5 -1" width="1" height="1" depth="1" scale="10 3 8" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 2 1" ></a-box>
+              <a-box 
+                     position="-5 -4.5 2" width="1" height="1" depth="1" scale="40 3 8" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 8 1" ></a-box>
+              <a-box 
+                     position="-20 -4.5 -1" width="1" height="1" depth="1" scale="10 3 8" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 2 1" ></a-box>
+              <a-box 
+                     position="-5 -4.5 -1" width="1" height="1" depth="1" scale="10 3 8" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 2 1" ></a-box>
+              <a-box 
+                     position="5 -4.5 -1" width="1" height="1" depth="1" scale="10 3 8" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 2 1" ></a-box>
+              <a-box 
+                     rotation="0 0 0"
+                     position="0 0 -5" width="1" height="1" depth="1" scale="0.5 12 0.5" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 0.1 4" ></a-box>
+              <a-box 
+                     rotation="0 0 0"
+                     position="12.5 1.5 -5" width="1" height="1" depth="1" scale="0.5 9 0.5" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 0.1 4" ></a-box>
+              <a-box 
+                     rotation="0 0 0"
+                     position="-12.5 1.5 -5" width="1" height="1" depth="1" scale="0.5 9 0.5" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 0.1 4" ></a-box>
+              <a-box 
+                     rotation="0 0 0"
+                     position="0 -3 -5.01" width="1" height="1" depth="1" scale="50 0.5 0.5" static-body color="#c0c0c0"
+                     material="src: #wall; side: double; color: #c0c0c0; repeat: 10 0.2" ></a-box>
+              <a-box position="12.5 -3 -3.5" rotation="270 0 0" width="1" height="1" depth="1" scale="0.1 0.7 0.2" 
+                     material="color: #ffffff; emissive: #ffffff" geometry="" id="lightbox10">
+<!--                   <a-entity id="lamp10" light="color: #ffffff; type: spot; angle: 60; decay: 1; distance: 20; penumbra: 0.5" 
+                            visible="" position="0 -1.47768 0">
+                  </a-entity>             -->
+              </a-box>
+              <a-box position="-12.5 -3 -3.5" rotation="270 0 0" width="1" height="1" depth="1" scale="0.1 0.7 0.2" 
+                     material="color: #ffffff; emissive: #ffffff" geometry="" id="lightbox11">
+<!--                   <a-entity id="lamp11" light="color: #ffffff; type: spot; angle: 60; decay: 1; distance: 20; penumbra: 0.5" 
+                            visible="" position="0 -1.47768 0">
+                  </a-entity>             -->
+              </a-box>
+      </a-entity>
+      
+      
+      <!--LAMPS------------->
+      <a-entity position="12.5 3.9 4">
+          <a-box width="0.2" height="8" depth="0.2"
+                 material="color: grey;" static-body></a-box>
+          <a-box width="1.2" height="0.16" depth="0.16" position="0 3.8 -0.5" rotation="0 90 0"
+                 material="color: grey;"></a-box>
+          <a-box position="0 3.78 -0.7" rotation="270 0 0" width="1" height="1" depth="1" scale="0.1 0.7 0.2" material="color: #ffffff; emissive: #ffffff" geometry="" id="lightbox1">
+<!--               <a-entity id="lamp1" light="color: #ffffff; type: spot; angle: 45; decay: 1; distance: 20; penumbra: 0" visible="" position="0 -1.47768 0"></a-entity>             -->
+          </a-box>           
+      </a-entity>
+      <a-entity rotation="0 180 0"
+                position="12.5 3.9 -4">
+          <a-box width="0.2" height="8" depth="0.2"
+                 material="color: grey;" static-body></a-box>
+          <a-box width="1.2" height="0.16" depth="0.16" position="0 3.8 -0.5" rotation="0 90 0"
+                 material="color: grey;"></a-box>
+          <a-box position="0 3.78 -0.7" rotation="270 0 0" width="1" height="1" depth="1" scale="0.1 0.7 0.2" material="color: #ffffff; emissive: #ffffff" geometry="" id="lightbox2">
+<!--               <a-entity id="lamp2" light="color: #ffffff; type: spot; angle: 45; decay: 1; distance: 20; penumbra: 0" visible="" position="0 -1.47768 0"></a-entity>             -->
+          </a-box>           
+      </a-entity>
+      <a-entity position="-12.5 3.9 4">
+          <a-box width="0.2" height="8" depth="0.2"
+                 material="color: grey;" static-body></a-box>
+          <a-box width="1.2" height="0.16" depth="0.16" position="0 3.8 -0.5" rotation="0 90 0"
+                 material="color: grey;"></a-box>
+          <a-box position="0 3.78 -0.7" rotation="270 0 0" width="1" height="1" depth="1" scale="0.1 0.7 0.2" material="color: #ffffff; emissive: #ffffff" geometry="" id="lightbox3">
+<!--               <a-entity id="lamp3" light="color: #ffffff; type: spot; angle: 45; decay: 1; distance: 20; penumbra: 0" visible="" position="0 -1.47768 0"></a-entity>             -->
+          </a-box>           
+      </a-entity>
+      <a-entity rotation="0 180 0"
+                position="-12.5 3.9 -4">
+          <a-box width="0.2" height="8" depth="0.2"
+                 material="color: grey;" static-body></a-box>
+          <a-box width="1.2" height="0.16" depth="0.16" position="0 3.8 -0.5" rotation="0 90 0"
+                 material="color: grey;"></a-box>
+          <a-box position="0 3.78 -0.7" rotation="270 0 0" width="1" height="1" depth="1" scale="0.1 0.7 0.2" material="color: #ffffff; emissive: #ffffff" geometry="" id="lightbox4">
+<!--               <a-entity id="lamp4" light="color: #ffffff; type: spot; angle: 45; decay: 1; distance: 20; penumbra: 0" visible="" position="0 -1.47768 0"></a-entity>             -->
+          </a-box>           
+      </a-entity> 
+      
+      <a-entity light="color: #fff; intensity: 0.5; type: ambient;" visible="true"></a-entity> 
+      
+      <!--LAMPS WITH TRAFFIC LIGHTS---->
+      <a-entity position="-1.8 3.9 4">
+          <a-box width="0.2" height="8" depth="0.2"
+                 material="color: grey;" static-body></a-box>
+          <a-box width="1.2" height="0.16" depth="0.16" position="0 3.8 -0.5" rotation="0 90 0"
+                 material="color: grey;"></a-box>
+          <a-box position="0 3.78 -0.7" rotation="270 0 0" width="1" height="1" depth="1" scale="0.1 0.7 0.2" material="color: #ffffff; emissive: #ffffff" geometry="" id="lightbox5">
+<!--               <a-entity id="lamp5" light="color: #ffffff; type: spot; angle: 45; decay: 1; distance: 20; penumbra: 0.5" visible="" position="0 -1.47768 0"></a-entity>             -->
+          </a-box>           
+      </a-entity>
+      <a-entity rotation="0 180 0"
+                position="1.8 3.9 -4">
+          <a-box width="0.2" height="8" depth="0.2"
+                 material="color: grey;" static-body></a-box>
+          <a-box width="1.2" height="0.16" depth="0.16" position="0 3.8 -0.5" rotation="0 90 0"
+                 material="color: grey;"></a-box>
+          <a-box position="0 3.78 -0.7" rotation="270 0 0" width="1" height="1" depth="1" scale="0.1 0.7 0.2" material="color: #ffffff; emissive: #ffffff" geometry="" id="lightbox6">
+<!--               <a-entity id="lamp6" light="color: #ffffff; type: spot; angle: 45; decay: 1; distance: 20; penumbra: 0.5" visible="" position="0 -1.47768 0"></a-entity>             -->
+          </a-box>           
+      </a-entity>      
+       
+      
+      <a-text value="Back to main page" lirkis-text-component position="12.5 1.6 -9" rotation="0 0 0" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="2 2 1" ></a-text>
+      <a-entity link="href: index.html; title: My Homepage;">
+              <a-box class="clickable" exit-vr-scene id="box" depth="0.6" height="0.6" width="0.6" position="12.5 2.3 -9" material="src: #grid2"></a-box>
+      </a-entity>
+                  
+      
+    <a-sky src="#skybox" rotation="0 90 0"></a-sky> 
+   
+</a-scene>
+  </body>
+</html>
