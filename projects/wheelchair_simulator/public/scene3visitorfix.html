@@ -1,0 +1,968 @@
+<!-- Modely prevzaté z : https://samgauths.itch.io/lowpol
+                         https://rigmodels.com/model.php?view=Taxi_Low-poly-3d-model__7H9TZZ6TZNZI7S1P9GOKR2JKO
+                         https://rigmodels.com/model.php?view=model__5F358VDCRF1UEVSOZ9JJ2DQBZ&y
+ + STANDARDNA SADA MODELOV POSKYTNUTA LIRKIS G-CVE -->
+<html>
+ <head>
+    <meta charset="utf-8">
+    <title>LIRKIS G-CVE VR platform</title>
+    <meta name="description" content="LIRKIS G-CVE edu project">
+     <!--AFRAME release + extras with dynamic functionality----------------------------------------------------------------->
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>  
+    <!--SUPERHANDS SCRIPT--------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script>
+    <!-- AFRAME EXTRAS components------------------------------------------------------------------------------------------->
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <!-- NETWORKED AFRAME -------------------------------------------------------------------------------------------------->    
+    <script src="https://unpkg.com/networked-aframe@^0.7.1/dist/networked-aframe.min.js"></script>  
+    <!--PHYSICS SYSTEM------------------------------------------------------------------------------------------------------>
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.1.1/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script>
+    <!--COMMUNICATION MODULES----------------------------------------------------------------------------------------------->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script> 
+    <!--<script src="easyrtc/easyrtc.js"></script> -->
+    <!--OTHER SCRIPTS------------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>
+    <script src="js/body_rot.js"></script>
+   
+    <!--CAM KINEMATICS COMPONENT-------------------------------------------------------------------------------------------->
+    <script src="https://rawgit.com/urish/aframe-camera-events/master/index.js"></script>   
+</head>
+  
+<body>
+    
+<!--- A-FRAME SCENE ----------------------------------------------------------------------------------------------------->
+    <a-scene 
+      physics
+      networked-scene="
+      room: scene3;
+      debug: true;"
+      stats
+      >
+<!-- ASSETS INCLUDING ITEMS, MATERIAL, 3D OBJETS, SOURCES AND MIXINS, which are used to build 3D virtual environment --->      
+  <a-assets timeout="15000">
+<!-- Pathss of attached models -  stored on github ------------------------------------------------------------------------>
+              <a-asset-item id="hmd-obj" src="dist/head.obj"></a-asset-item>
+              <a-asset-item id="hmd-mtl" src="dist/head.mtl"></a-asset-item> 
+    
+              <a-asset-item id="quest-right" src="dist/controller/quest-right.obj"></a-asset-item>
+              <a-asset-item id="quest-left" src="dist/controller/quest-left.obj"></a-asset-item>
+    
+              <a-asset-item id="wheelchair-obj" src="wheelchairmodel/wh01baked.obj"></a-asset-item>
+              <a-asset-item id="wheelchair-mtl" src="wheelchairmodel/wh01baked.mtl"></a-asset-item>
+    
+              <a-asset-item id="wheelchair-person-obj" src="avatar-body/lowPolyHumanWheelchair.obj"></a-asset-item>
+              <a-asset-item id="visitor-obj" src="avatar-body/lowPolyHuman.obj"></a-asset-item>
+    
+              <img id="grid1" src="dist/imgs/Grid1m01.png" crossorigin="anonymous" />
+    
+              <img id="ground" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2Froad.jpg?v=1617410378761" crossorigin="anonymous" />
+              <img id="wall" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2Fwall_building.jpg?v=1617450971057" crossorigin="anonymous"/>
+              <img id="traffic_cone" src="https://cdn.glitch.com/40ab4e64-adbd-4acd-801d-d2b7569137c9%2Ftraffic_cone.png?v=1617490131347" crossorigin="anonymous"/>
+
+              <img id="groundTexture" src="dist/imgs/imgplan.png" crossorigin="anonymous" />
+              <img id="skybox" src="dist/imgs/skybox.jpg" crossorigin="anonymous" />
+        
+<!-- Templates - objects utilized in AVATAR MODEL construction ------------------------------------------------------------------------>  
+              <template id="avatar-template">
+                    <a-entity class="avatar">
+                            <a-entity position="0 0 0">
+                                <a-obj-model src="#hmd-obj" color="black" scale="0.375 0.375 0.375" position="0 0 0">
+                                </a-obj-model>
+                                <a-sphere class="head" color="#A0A0B2" scale="0.15 0.15 0.15" position="0 -0.03 0"></a-sphere> 
+                                <a-entity class="rayhead" id="raycasterPatient" cursor raycaster="objects: .clickable; showLine: true; far: 500" line="color: white; opacity: 1" position="0 0 0" visible="true"></a-entity>       
+                           </a-entity>
+                      </a-entity>  
+              </template>
+
+              <!-- oculus controllers templates------>
+              <template id="hand-template-left">
+                <a-entity>
+                  <a-obj-model src="#quest-left" color="black">
+                  </a-obj-model>
+                </a-entity>
+              </template>
+    
+              <template id="hand-template-right">
+                <a-entity>
+                  <a-obj-model src="#quest-right" color="black">
+                  </a-obj-model>
+                </a-entity>
+              </template>
+
+              <!-- wheelchair template------>
+              <template id="wheelchair-template">
+                <a-entity>
+                  <a-obj-model src="#wheelchair-obj" mtl="#wheelchair-mtl" scale="0.15 0.15 0.15"
+                               rotation="0 180 0" position="0.14 0.287 0"
+                               visible="false"></a-obj-model>
+                </a-entity>
+              </template>
+    
+              <!-- wheelchair human body template------>
+              <template id="wheelchair-human-body-template">
+                <a-entity>   
+                    <a-obj-model src="#wheelchair-person-obj" 
+                                 scale="0.135 0.135 0.135" 
+                                 rotation="0 180 0" 
+                                 position="0 -0.1 0" 
+                                 material="color: #D3D3D3"
+                                 visible="false"
+                                 ></a-obj-model>
+                  </a-entity>
+              </template>
+    
+    
+              <!-- wheelchair VR head corrector template ---->
+              <template id="playerhead-vr-template">
+                <a-entity>   
+                </a-entity>
+              </template>
+    
+    
+              <!-- visitor body template------>
+              <template id="visitor-body-template">
+                <a-entity>
+                  <a-obj-model src="#visitor-obj" scale="0.6 0.6 0.6" position="0 0.777 0" material="color: #D3D3D3" visible="false"></a-obj-model>
+                </a-entity>
+              </template>
+              <template id="visitor-body-abstract-template">
+                <a-entity>
+                  <a-obj-model src="#visitor-obj" 
+                               scale="0.6 0.6 0.6" 
+                               position="0 0.777 0" 
+                               rotation="0 180 0"
+                               material="color: #D3D3D3"></a-obj-model>
+                </a-entity>
+              </template>
+
+              <template id="wheelchair-abstract-template">
+                <a-entity>
+                  <a-obj-model src="#wheelchair-obj" 
+                               mtl="#wheelchair-mtl" 
+                               scale="0.15 0.15 0.15"
+                               rotation="0 180 0" 
+                               position="0.14 0.287 -0.1">
+                  </a-obj-model>
+                </a-entity>
+              </template>
+    
+              <template id="wheelchair-human-body-abstract-template">
+                <a-entity>   
+                  <a-obj-model src="#wheelchair-person-obj" 
+                                 scale="0.135 0.135 0.135" 
+                                 rotation="0 180 0" 
+                                 position="0 -0.1 -0.1" 
+                                 material="color: #D3D3D3">
+                  </a-obj-model>
+                </a-entity>
+              </template>
+    
+  </a-assets> 
+<!-- /END OF ASSETS---------------------------------------------------------------------------------------------------->
+
+<!--SHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      <!-- AVATAR BODY ------------->
+      <a-entity id="fullbody"> 
+         <a-entity   
+                    id="rig"      
+                    networked="template:#visitor-body-template;attachTemplateToLocal:false;"      
+                    position = "10 0 -3"
+                    rotation="0 180 0"
+                    movement-controls="enabled: true; speed: 0.15"
+                    gaze-interaction  
+                    kinematic-body="radius:0.2;"
+                    >
+                  <a-entity
+                            id="playerhead"
+                            networked="template:#avatar-template;attachTemplateToLocal:false;"
+                            camera 
+                            position="0 1.7 0"
+                            rotation="0 0 0"
+                            look-controls="pointerLockEnabled:false"                          
+                            >                  
+                             <!--END OF 3D CURSOR IMPLEMENTATION ------------------------------------------->
+                             <a-sphere class="head" visible="true" random-color></a-sphere>
+                             <a-entity id="specificHead" class="rayhead" cursor raycaster="objects: .clickable; showLine: true; far: 500" line="color: white; opacity: 1" position="0 0 0" visible="false"></a-entity> 
+<!--                              <a-entity cursor="fuse: true; fuseTimeout: 500" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: black; shader: flat" position="0 0 -1"></a-entity>  -->
+                 </a-entity>  
+         </a-entity> 
+        <a-entity id="bodymodel"
+                  networked="template:#visitor-body-abstract-template;attachTemplateToLocal:false;"      
+                  position = "0 180 0"
+                  rotation="0 0 0"
+                  set-rotation
+                  set-position
+                  > 
+         </a-entity>
+      </a-entity>  
+      <!-- END OF AVATAR BODY ------------->
+<!-- END OFSHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      
+ <!-- NETWORKED AFRAME SCHEMES NAF including shared template and its property---------------------------------------------->   
+      <script>
+          NAF.schemas.add({
+        template: '#avatar-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.head',
+            component: 'material',
+            property: 'color'
+          },
+        ]
+      });
+        NAF.schemas.add({
+        template: '#visitor-body-abstract-template',
+        components: [
+          'position',
+          'rotation',
+        ]
+      });
+    </script>
+      
+<!-- LOCAL ENVIRONMENT OBJECTs------------------------------------------------------------------------------------------------------>   
+      <!--GROUND----------------->
+      <a-plane geometry="height: 15; width: 30" 
+               material="src: #ground; side: double; color: #c0c0c0; repeat: 15 7.5" 
+               position="10 0 3.5" rotation="-90 0 0" static-body id="ground_base">
+      </a-plane>
+      <a-plane geometry="height: 2; width: 4" 
+               material="src: #ground; side: double; color: #c0c0c0; repeat: 2 1" 
+               position="10 0 12" rotation="-90 0 0" static-body id="ground_wheelchair">
+      </a-plane>  
+      <a-plane geometry="height: 2; width: 4" 
+               material="src: #ground; side: double; color: #c0c0c0; repeat: 2 1" 
+               position="10 0 -5" rotation="-90 0 0" static-body id="ground_menu">
+      </a-plane> 
+
+      
+      
+      <!--WALLS------------->
+      <a-plane geometry="height: 1.5; width: 15" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 3.75 0.5" 
+               position="25 0.75 3.5" rotation="0 90 0" static-body id="wall_first_route_1">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 15" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 3.75 0.5" 
+               position="-5 0.75 3.5" rotation="0 90 0" static-body id="wall_first_route_2">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 13" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 3.25 0.5" 
+               position="1.5 0.75 -4" rotation="0 0 0" static-body id="wall_first_route_3">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 13" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 3.25 0.5" 
+               position="1.5 0.75 11" rotation="0 0 0" static-body id="wall_second_route_1">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 13" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 3.25 0.5" 
+               position="18.5 0.75 -4" rotation="0 0 0" static-body id="wall_second_route_2">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 13" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 3.25 0.5" 
+               position="18.5 0.75 11" rotation="0 0 0" static-body id="wall_second_route_3">
+      </a-plane>
+      
+      <a-plane geometry="height: 1.5; width: 4" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 1 0.5" 
+               position="10 0.75 13" rotation="0 0 0" static-body id="wall_wheelchair_1">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 2" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 0.5 0.5" 
+               position="8 0.75 12" rotation="0 90 0" static-body id="wall_wheelchair_2">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 2" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 0.5 0.5" 
+               position="12 0.75 12" rotation="0 90 0" static-body id="wall_wheelchair_3">
+      </a-plane>
+      
+      <a-plane geometry="height: 1.5; width: 4" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 1 0.5" 
+               position="10 0.75 -6" rotation="0 0 0" static-body id="wall_menu_1">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 2" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 0.5 0.5" 
+               position="8 0.75 -5" rotation="0 90 0" static-body id="wall_menu_2">
+      </a-plane>
+      <a-plane geometry="height: 1.5; width: 2" 
+               material="src: #wall; side: double; color: #c0c0c0; repeat: 0.5 0.5" 
+               position="12 0.75 -5" rotation="0 90 0" static-body id="wall_menu_3">
+      </a-plane>
+
+      <!--FIRST ROUTE------->
+      <a-text value="First Route" lirkis-text-component position="12 2 8.5" rotation="0 270 0" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="2 2 1" ></a-text>
+
+      
+      <!--RIGHT BOTTOM CONE--------->
+      <a-entity position="12 0.35 10" static-body id="cone_1">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      
+      <a-entity position="12 0.35 7" static-body id="cone_2">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="13.5 0.35 10" static-body id="cone_3">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="13.5 0.35 7" static-body id="cone_4">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="15 0.35 9.25" static-body id="cone_5">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="15 0.35 6.25" static-body id="cone_6">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="16.5 0.35 8.5" static-body id="cone_7">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="16.5 0.35 5.5" static-body id="cone_8">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>  
+      <a-entity position="18 0.35 8.5" static-body id="cone_9">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="18 0.35 5.5" static-body id="cone_10">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="19.5 0.35 9.25" static-body id="cone_11">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="19.5 0.35 6.25" static-body id="cone_12">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="21 0.35 10" static-body id="cone_13">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="21 0.35 7" static-body id="cone_14">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="23.5 0.35 8.5" static-body id="cone_15">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="22.6 0.35 9.6" static-body id="cone_16">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="24 0.35 7" static-body id="cone_17">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="23.25 0.35 5.5" static-body id="cone_18">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="20.25 0.35 5.5" static-body id="cone_19">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="22.5 0.35 4" static-body id="cone_20">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="19.5 0.35 4" static-body id="cone_21">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="22.5 0.35 2.5" static-body id="cone_22">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="19.5 0.35 2.5" static-body id="cone_23">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity> 
+      <a-entity position="23.25 0.35 1" static-body id="cone_24">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="20.25 0.35 1" static-body id="cone_25">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="24 0.35 -0.5" static-body id="cone_26">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="21 0.35 -0.5" static-body id="cone_27">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="21 0.35 -3.5" static-body id="cone_28">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="22.5 0.35 -3.1" static-body id="cone_29">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="23.6 0.35 -2" static-body id="cone_30">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+       <a-entity position="19.5 0.35 -3.5" static-body id="cone_31">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="19.5 0.35 -0.5" static-body id="cone_32">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="18 0.35 -3.5" static-body id="cone_33">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="18 0.35 -0.5" static-body id="cone_34">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="16.5 0.35 -3.5" static-body id="cone_35">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="16.5 0.35 -0.5" static-body id="cone_36">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="15 0.35 -2.75" static-body id="cone_37">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="15 0.35 0.25" static-body id="cone_38">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="13.5 0.35 -2" static-body id="cone_39">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="13.5 0.35 1" static-body id="cone_40">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="12 0.35 -2" static-body id="cone_41">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="12 0.35 1" static-body id="cone_42">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="12 0.35 2.5" static-body id="cone_43">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="12 0.35 4" static-body id="cone_44">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="12 0.35 5.5" static-body id="cone_45">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      
+      <a-text value="Finish" lirkis-text-component position="12 2 -0.5" rotation="0 90 0" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="2 2 1" ></a-text>
+      
+      
+      <!--SECOND ROUTE------->
+      <a-text value="Second Route" lirkis-text-component position="8 2 8.5" rotation="0 90 0" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="2 2 1" ></a-text>
+
+      
+      <!---LEFT BOTTOM CONE---------->
+      <a-entity position="8 0.35 10" static-body id="cone_46">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+
+      
+      <a-entity position="6.5 0.35 10" static-body id="cone_47">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="5 0.35 10" static-body id="cone_48">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="3.5 0.35 10" static-body id="cone_49">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity> 
+      <a-entity position="2 0.35 10" static-body id="cone_50">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="0.5 0.35 10" static-body id="cone_51">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>   
+      <a-entity position="-1 0.35 10" static-body id="cone_52">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="-2.5 0.35 10" static-body id="cone_53">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="-4 0.35 10" static-body id="cone_54">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>     
+      <a-entity position="-4 0.35 8.5" static-body id="cone_55">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="-4 0.35 7" static-body id="cone_56">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="-4 0.35 5.5" static-body id="cone_57">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="-4 0.35 4" static-body id="cone_58">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="-2.5 0.35 4" static-body id="cone_59">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="-2.5 0.35 2.5" static-body id="cone_60">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="-2.5 0.35 1" static-body id="cone_61">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="-2.5 0.35 -0.5" static-body id="cone_62">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="-2.5 0.35 -2" static-body id="cone_63">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="-1 0.35 -2" static-body id="cone_64">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="0.5 0.35 -2" static-body id="cone_65">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="2 0.35 -2" static-body id="cone_66">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="2 0.35 -3.5" static-body id="cone_67">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="3.5 0.35 -3.5" static-body id="cone_68">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="5 0.35 -3.5" static-body id="cone_69">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="6.5 0.35 -3.5" static-body id="cone_70">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="8 0.35 -3.5" static-body id="cone_71">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity> 
+      <a-entity position="8 0.35 -2" static-body id="cone_72">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="5 0.35 -0.5" static-body id="cone_73">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="8 0.35 7" static-body id="cone_74">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="6.5 0.35 7" static-body id="cone_75">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="8 0.35 10" static-body id="cone_76">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="3.5 0.35 8.5" static-body id="cone_77">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity> 
+      <a-entity position="3.5 0.35 7" static-body id="cone_78">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity> 
+      <a-entity position="3.5 0.35 5.5" static-body id="cone_79">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="3.5 0.35 4" static-body id="cone_80">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity> 
+      <a-entity position="8 0.35 5.5" static-body id="cone_81">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="8 0.35 4" static-body id="cone_82">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="5 0.35 4" static-body id="cone_83">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="8 0.35 2.5" static-body id="cone_84">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="8 0.35 1" static-body id="cone_85">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="6.5 0.35 1" static-body id="cone_86">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="5 0.35 1" static-body id="cone_87">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="3.5 0.35 1" static-body id="cone_88">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="2 0.35 1" static-body id="cone_89">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="0.5 0.35 1" static-body id="cone_90">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity> 
+      <a-entity position="0.5 0.35 2.5" static-body id="cone_91">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="0.5 0.35 4" static-body id="cone_92">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="0.5 0.35 5.5" static-body id="cone_93">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="0.5 0.35 7" static-body id="cone_94">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      <a-entity position="-1 0.35 7" static-body id="cone_95">
+          <a-cone radius-bottom="0.3" segments-height="1" segments-radial="6" radius-top="0.03" height="0.9"
+                  material="src: #traffic_cone; side: double; repeat: 0.05 2"></a-cone>
+          <a-cylinder position="0 -0.35 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.35"></a-cylinder>
+          <a-cylinder position="0 0.402 0" color="#ec6423" segments-height="1" segments-radial="6" height="0.1" radius="0.03"></a-cylinder>
+      </a-entity>
+      
+            <a-text value="Finish" lirkis-text-component position="8 2 -0.5" rotation="0 270 0" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="2 2 1" ></a-text>
+      
+      
+      <a-text value="Wheelchair" lirkis-text-component position="10 2 12" rotation="0 180 0" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="2 2 1" ></a-text>
+      <!-- FLOOR MARKINGS FOR MOVEMENT --->
+      <!----FIRST ROUTE------->
+      <a-plane geometry="height: 2; width: 0.05" position="13.0 0.01 8.5"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane>
+      <a-plane geometry="height: 3; width: 0.05" position="15.25 0.01 7.75"
+               material="side: double; color: lime" rotation="-90 120 0"></a-plane>
+      <a-plane geometry="height: 2; width: 0.05" position="17.5 0.01 7"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane>
+      <a-plane geometry="height: 3; width: 0.05" position="19.75 0.01 7.75"
+               material="side: double; color: lime" rotation="-90 60 0"></a-plane>
+      <a-plane geometry="height: 2.2; width: 0.05" position="21.75 0.01 7.75"
+               material="side: double; color: lime" rotation="-90 140 0"></a-plane>
+      <a-plane geometry="height: 3; width: 0.05" position="21.7 0.01 5.6"
+               material="side: double; color: lime" rotation="-90 210 0"></a-plane>
+      <a-plane geometry="height: 2; width: 0.05" position="20.95 0.01 3.3"
+               material="side: double; color: lime" rotation="-90 0 0"></a-plane>
+      
+      
+      <a-plane geometry="height: 3; width: 0.05" position="21.7 0.01 1"
+               material="side: double; color: lime" rotation="-90 150 0"></a-plane>
+      <a-plane geometry="height: 2; width: 0.05" position="22 0.01 -1.15"
+               material="side: double; color: lime" rotation="-90 30 0"></a-plane>
+      <a-plane geometry="height: 5; width: 0.05" position="19 0.01 -2"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane>
+      <a-plane geometry="height: 3; width: 0.05" position="15.25 0.01 -1.25"
+               material="side: double; color: lime" rotation="-90 120 0"></a-plane>
+      <a-plane geometry="height: 2; width: 0.05" position="13.0 0.01 -0.5"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane>
+      
+      <!----SECOND ROUTE------>
+      <a-plane geometry="height: 3; width: 0.05" position="6.5 0.01 8.5"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane>
+      <a-plane geometry="height: 3; width: 0.05" position="5 0.01 7"
+               material="side: double; color: lime" rotation="-90 0 0"></a-plane>
+      <a-plane geometry="height: 1.5; width: 0.05" position="5.75 0.01 5.5"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane>
+      <a-plane geometry="height: 3; width: 0.05" position="6.5 0.01 4"
+               material="side: double; color: lime" rotation="-90 0 0"></a-plane>
+      <a-plane geometry="height: 4.5; width: 0.05" position="4.25 0.01 2.5"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane>
+      <a-plane geometry="height: 6; width: 0.05" position="2 0.01 5.5"
+               material="side: double; color: lime" rotation="-90 0 0"></a-plane>
+      <a-plane geometry="height: 4.5; width: 0.05" position="-0.25 0.01 8.5"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane>
+      <a-plane geometry="height: 3; width: 0.05" position="-2.5 0.01 7"
+               material="side: double; color: lime" rotation="-90 0 0"></a-plane>
+      <a-plane geometry="height: 1.5; width: 0.05" position="-1.75 0.01 5.5"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane>
+      <a-plane geometry="height: 6; width: 0.05" position="-1 0.01 2.5"
+               material="side: double; color: lime" rotation="-90 0 0"></a-plane>
+      <a-plane geometry="height: 4.5; width: 0.05" position="1.25 0.01 -0.5"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane>
+      <a-plane geometry="height: 1.5; width: 0.05" position="3.5 0.01 -1.25"
+               material="side: double; color: lime" rotation="-90 0 0"></a-plane>   
+      <a-plane geometry="height: 1.5; width: 0.05" position="7.25 0.01 -0.5"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane>
+      <a-plane geometry="height: 1.5; width: 0.05" position="6.5 0.01 -1.25"
+               material="side: double; color: lime" rotation="-90 0 0"></a-plane>
+      <a-plane geometry="height: 3; width: 0.05" position="5 0.01 -2"
+               material="side: double; color: lime" rotation="-90 90 0"></a-plane>
+
+      
+
+      <!--BACK TO MENU------>
+
+
+      
+      <a-text value="Back to main page" lirkis-text-component position="10 3 -5" rotation="0 0 0" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="2 2 1" ></a-text>
+      <a-entity link="href: index.html; title: My Homepage;">
+              <a-box id="returnBox" depth="0.6" height="0.6" width="0.6" position="10 2.3 -5" material="src: #grid1"></a-box>
+      </a-entity>
+                  
+
+      
+    <!--LIGHTS implementation -->
+     <a-entity light="color: #fff; intensity: 1.2; type: ambient;" visible="true"></a-entity>
+      
+    <a-sky src="#skybox" rotation="0 90 0"></a-sky> 
+   
+</a-scene>
+  </body>
+</html>
