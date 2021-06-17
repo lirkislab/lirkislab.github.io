@@ -1,0 +1,255 @@
+<html>
+ <head>
+    <meta charset="utf-8">
+    <title>Industry platform</title>
+    <meta name="description" content="Physics CVE">
+     <!--AFRAME release ---------------------------------------------------------------------------------------------------->
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>  
+    <!--SUPERHANDS SCRIPT--------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script>
+    <!-- AFRAME EXTRAS components------------------------------------------------------------------------------------------->
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <!-- NETWORKED AFRAME -------------------------------------------------------------------------------------------------->    
+    <script src="https://unpkg.com/networked-aframe@^0.7.1/dist/networked-aframe.min.js"></script>  
+    <!--PHYSICS SYSTEM------------------------------------------------------------------------------------------------------>
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.1.1/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script>
+    <!--COMMUNICATION MODULES----------------------------------------------------------------------------------------------->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script> 
+    <!--RANDOMIZER SCRIPTS-------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>
+    <!--CAM KINEMATICS COMPONENT-------------------------------------------------------------------------------------------->
+    <script src="https://rawgit.com/urish/aframe-camera-events/master/index.js"></script>   
+    <!--OTHER SCRIPTS -->
+    <script src="js/entity_rotate.js"></script> 
+    <script src="js/cursor_manipulator_prototype.js"></script> 
+    <script src="js/spawner.js"></script> 
+    <script src="js/user_id.js"></script> 
+</head>
+  
+<body>
+    
+<!--- A-FRAME SCENE ----------------------------------------------------------------------------------------------------->
+    <a-scene 
+      physics
+      networked-scene="
+      room: basic;
+      debug: true;                      
+    ">
+<!-- ASSETS INCLUDING ITEMS, MATERIAL, 3D OBJETS, SOURCES AND MIXINS, which are used to build 3D virtual environment --->      
+  <a-assets timeout="15000">
+<!-- Pathss of attached models -  stored on github ------------------------------------------------------------------------>
+              
+              <a-mixin id="touch"
+                           physics-collider phase-shift
+                           collision-filter="collisionForces: false"
+                           static-body="shape: sphere; sphereRadius: 0.02"
+                           super-hands="colliderEvent: collisions;
+                                        colliderEventProperty: els;
+                                        colliderEndEvent: collisions;
+                                        colliderEndEventProperty: clearedEls;">
+              </a-mixin>
+    
+              <a-asset-item id="hmd-obj" src="dist/head.obj"></a-asset-item>
+              <a-asset-item id="hmd-mtl" src="dist/head.mtl"></a-asset-item>
+
+              <a-asset-item id="body-obj" src="dist/skeletonAvatar.obj"></a-asset-item>
+              <a-asset-item id="body-mtl" src=""></a-asset-item>
+    
+              <a-asset-item id="bodyForklift-obj" src="https://raw.githubusercontent.com/mayorian/3dmodels/master/IndustryObjects/forkliftObject/forklift.obj"></a-asset-item>
+              <a-asset-item id="bodyForklift-mtl" src="https://raw.githubusercontent.com/mayorian/3dmodels/master/IndustryObjects/forkliftObject/forklift.mtl"></a-asset-item>
+    
+             <a-asset-item id="hall-obj" src="https://raw.githubusercontent.com/mayorian/3dmodels/master/IndustryObjects/IndustryBaked/industryHall01.obj"></a-asset-item>
+             <a-asset-item id="hall-mtl" src="https://raw.githubusercontent.com/mayorian/3dmodels/master/IndustryObjects/IndustryBaked/industryHall01.mtl"></a-asset-item>
+    
+              <img id="grid1" src="dist/imgs/Grid1m01.png" crossorigin="anonymous" />
+              <img id="grid2" src="dist/imgs/Grid1m02.png" crossorigin="anonymous" />
+              <img id="grid3" src="dist/imgs/Grid1m03.png" crossorigin="anonymous" />
+              <img id="grid4" src="dist/imgs/Grid1m04.png" crossorigin="anonymous" />
+              <img id="grid5" src="dist/imgs/Grid1m05.png" crossorigin="anonymous" />
+              <img id="grid6" src="dist/imgs/Grid1m06.png" crossorigin="anonymous" />
+   
+              <img id="groundTexture" src="dist/imgs/imgplan.png" crossorigin="anonymous" />
+              <img id="skybox" src="dist/imgs/skybox.jpg" crossorigin="anonymous" />
+    
+              <img src="https://raw.githubusercontent.com/mokargas/aframe-lensflare-component/master/examples/basic/images/flare2.jpg" alt="Test Lensflare Asset" id="flare-asset">
+              <img src="https://raw.githubusercontent.com/mokargas/aframe-lensflare-component/master/examples/basic/images/flare.jpg" alt="Test Lensflare Asset" id="flare-asset2">
+        
+<!-- Templates - objects utilized in AVATAR MODEL construction ------------------------------------------------------------------------>  
+              <template id="avatar-template">
+                    <a-entity class="avatar">
+                            <a-obj-model src="#hmd-obj" color="black" scale="0.25 0.25 0.25">
+                            </a-obj-model>
+                            <a-sphere class="head" color="#A0A0B2" scale="0.1 0.1 0.1" position="0 -0.03 0"  opacity="0.8"></a-sphere> 
+                            <a-text class="idtext" rotation="0 180 0" position="0 0.3 0" color="cyan" align="center" scale="0.8 0.8 0.8" value="LIRKIS USER"></a-text>
+                      <a-obj-model src="#body-obj" color="#A0A0B2" scale="0.5 0.5 0.5" position="0 -0.3 0" rotation="90 0 0" opacity="0.8">                           
+                       </a-obj-model>              
+                    </a-entity>  
+
+              </template>
+
+              <template id="avatar-body">
+                  <a-entity class="bodyavatar">   
+                  <!-- <a-obj-model src="#body-obj" mtl="#body-mtl" scale="0.05 0.04 0.05 " opacity="0.7">                           
+                       </a-obj-model> -->
+                  </a-entity>
+              </template>
+    
+              <template id="forklift-body">
+                  <a-entity class="bodyavatar">   
+                  <a-obj-model src="#bodyForklift-obj" mtl="#bodyForklift-mtl" scale="0.3 0.3 0.3" opacity="0.7">                           
+                       </a-obj-model>
+                  </a-entity>
+              </template>
+    
+               <template id="hand-template-left">
+                <a-entity>
+                  <a-obj-model src="dist/controller/quest-left.obj" color="black">
+                  </a-obj-model>
+                </a-entity>
+              </template>
+    
+              <template id="hand-template-right">
+                <a-entity>
+                  <a-obj-model src="dist/controller/quest-right.obj" color="black">
+                  </a-obj-model>
+                </a-entity>
+              </template>
+    
+            <template id="spawn-box-shared">
+                <a-entity>
+                  <a-box class="clickable" position="0 0 0" rotation="0 0 0" scale="0.5 0.5 0.5" material="src: #grid2" ></a-box>
+                </a-entity>
+              </template>
+    
+  </a-assets> 
+<!-- /END OF ASSETS---------------------------------------------------------------------------------------------------->
+
+<!--SHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      <!-- AVATAR BODY ------------->
+      <a-entity id="fullbody"> 
+         <a-entity   
+                    id="rig"      
+                    networked="template:#avatar-body;attachTemplateToLocal:false;persistent:false;"      
+                    position="-3 0 -4"
+                    rotation="0 0 0"
+                    movement-controls   
+                    gaze-interaction   
+                    spawner="template:#spawn-box-shared;attachTemplateToLocal:false;persistent:true;"
+                    
+                    >
+                  <a-entity
+                            id="playerhead"
+                            networked="template:#avatar-template;attachTemplateToLocal:false;persistent:false;"  
+                            camera 
+                            position="0 1.6 0"
+                            rotation="0 0 0"
+                            look-controls="pointerLockEnabled:true"                           
+                            >                  
+                             <!--USERNAME, RAYCASTER, CURSORs, ------------------------------------------->
+                            <a-text class="idtext" visible="true"  head-text ></a-text> <!-- head-text -->
+<!--                             <a-entity class="rayhead" cursor raycaster="objects: .clickable; showLine: true; far: 500" line="color: white; opacity: 1" position="0 -0.2 0" visible="false"></a-entity>  -->
+<!--                             <a-entity id="3dcursor" cursor="fuse: true; fuseTimeout: 500" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: black; shader: flat" position="0 0 -1"></a-entity>  -->
+<!--                             <a-box id="usercursor" static-body visible="true" width="0.02" height="0.02" depth="0.02" scale="1 1 1" position="0 0 -1" rotation="0 0 0"></a-box>            -->
+                            <a-sphere class="head" visible="true"></a-sphere>
+                           
+           </a-entity>  
+<!--             spawner-controller="template:#spawn-box-shared;attachTemplateToLocal:false;persistent:true;"  -->
+                  <a-entity id="leftController" oculus-touch-controls="hand:left" networked="template:#hand-template-left;"
+                            cursor raycaster="objects: .clickable; showLine: true; far: 0.05" line="color: white; opacity: 1" position="0 -0.2 0">
+                     <a-box id="usercursorL" static-body visible="true" width="0.02" height="0.02" depth="0.02" scale="1 1 1" position="0 0 0" rotation="0 0 0"></a-box>   
+                 </a-entity>
+           
+  
+                  <a-entity id="rightController" oculus-touch-controls="hand:right" networked="template:#hand-template-right;"
+                            cursor raycaster="objects: .clickable; showLine: true; far: 0.05" line="color: white; opacity: 1" position="0 -0.2 0">
+                     <a-box id="usercursorR" static-body visible="true" width="0.02" height="0.02" depth="0.02" scale="1 1 1" position="0 0 0" rotation="0 0 0"></a-box>   
+                 </a-entity>
+         </a-entity>  
+      </a-entity> 
+      <!-- END OF AVATAR BODY ------------->
+<!-- END OFSHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      
+ <!-- NETWORKED AFRAME SCHEMES NAF including shared template and its property---------------------------------------------->   
+      <script>
+          NAF.schemas.add({
+        template: '#avatar-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.head',
+            component: 'material',
+            property: 'color'
+          },
+          {
+            selector: '.idtext',
+            component: 'text',
+            property: 'value'
+          }
+        ]
+      });
+        
+        NAF.schemas.add({
+        template: '#spawn-box-shared',
+        components: [
+            'position',
+            'rotation',
+            'raycaster-listen',
+            'laser-listen'
+        ]
+      });      
+    </script>
+      
+<!-- LOCAL ENVIRONMENT OBJECTs------------------------------------------------------------------------------------------------------>   
+      
+      <a-entity id="instructions" scale="0.5 0.5 0.5" position="-3.025 0.829 -3.809">
+       <a-text value="Industry" lirkis-text-component="" position="0.27143 4 -7.77579" rotation="" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="3 3 1" text="" id="Title"></a-text>
+       <a-text value="Industry" lirkis-text-component="" position="0.27143 2.76981 -7.77579" rotation="" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="2 2 1" text="value: Press space to spawn 3D cube" id="Subtext1"></a-text>
+       <a-text value="Industry" lirkis-text-component="" position="0.27143 1.85738 -7.77579" rotation="" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="2 2 1" text="value: Then press and hold left-mouse-button to manipulate cube" id="Subtext2"></a-text>
+       <a-text value="Industry" lirkis-text-component="" position="0.27143 0.92654 -7.77579" rotation="" color="#116fe1" align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="2 2 1" text="value: Use WASD to move aroud the scene; color: #6fabf4" id="Subtext3"></a-text>
+      </a-entity>
+      
+      <a-plane geometry="height: 20; width: 20" 
+               material="src: #groundTexture; side: double; color: #c0c0c0; repeat: 20 20" 
+               position="0 0 -0.5" rotation="-90 0 0" static-body id="ground">
+      </a-plane>  
+      
+      <a-obj-model src="#hall-obj" mtl="#hall-mtl"
+                   scale="0.2 0.2 0.2"></a-obj-model>
+      
+      
+<!--       <a-box id="box1" position="-1.5 0.5 -5" cursor-listener material="src: #grid1"></a-box>
+      <a-box id="box2" position="1.5 0.5 -5" cursor-listener material="src: #grid2"></a-box>
+      <a-box id="box3" position="-3.5 0.5 -5" cursor-listener material="src: #grid3"></a-box>
+      <a-box id="box4" position="3.5 0.5 -5" cursor-listener color="silver" material="src: #grid4"></a-box>
+      <a-box id="box5" position="-5.5 0.5 -5" cursor-listener color="silver" material="src: #grid5"></a-box>
+      <a-box id="box6" position="5.5 0.5 -5" cursor-listener color="silver" material="src: #grid6"></a-box>
+       -->
+      
+    <!-- PHYSICS - STATIC Boudaries -->
+      <a-box id="table1" position="1.498 0.262 0" rotation="0 0 0" scale="1.1 1.0 6.5" height="1" width="1" depth="1" static-body visible="false"></a-box>
+      <a-box id="table2" position="0.092 0.269 -3.665" rotation="0 90 0" scale="1.1 1.0 6.4" height="1" width="1" depth="1" static-body visible="false"></a-box>
+      <a-box id="Wall1" position="0.092 0.092 -8.357" rotation="0 90 0" scale="1.1 10 20" height="1" width="1" depth="1" static-body visible="false"></a-box>
+      <a-box id="Wall2" position="0.092 0.092 8.395" rotation="0 90 0" scale="1.1 10 20" height="1" width="1" depth="1" static-body visible="false"></a-box>
+      <a-box id="Wall3" position="8.771 0.092 -0.329" rotation="0 0 0" scale="1.1 10 20" height="1" width="1" depth="1" static-body visible="false"></a-box>
+      <a-box id="Wall4" position="-8.633 0.092 -0.329" rotation="0 0 0" scale="1.1 10 20" height="1" width="1" depth="1" static-body visible="false"></a-box>
+      <a-box id="Shelf1" position="-6.986 0.990 0" rotation="0 0 0" scale="2 0.1 12" height="1" width="1" depth="1" static-body visible="false"></a-box>
+      <a-box id="Shelf2" position="-6.986 2.212 0" rotation="0 0 0" scale="2 0.1 12" height="1" width="1" depth="1" static-body visible="false"></a-box>
+      <a-box id="Shelf3" position="6.996 0.990 0" rotation="0 0 0" scale="2 0.1 12" height="1" width="1" depth="1" static-body visible="false"></a-box>
+      <a-box id="Shelf4" position="6.996 2.212 0" rotation="0 0 0" scale="2 0.1 12" height="1" width="1" depth="1" static-body visible="false"></a-box>
+
+    <!--LIGHTS implementation -->
+     <a-entity light="color: #fff; intensity: 1.2; type: ambient;" visible="true"></a-entity>
+     <a-entity light="color: #ffffff; type: point; decay: 0.94; distance: 10; intensity: 0.79" visible="" id="PointLight1" position="0 4.78626 -1.13455"></a-entity>
+     <a-box id="boxLight1" position="3.79123 5.58821 -3.95738" material="emissive: #ffffff" geometry="depth: 0.14; height: 0.11" rotation="0 0 -8.18"></a-box>
+     <a-box id="boxLight2" position="-3.6653 5.58821 -3.95738" material="emissive: #ffffff" geometry="depth: 0.14; height: 0.11" rotation="0 0 8.18"></a-box>
+     <a-box id="boxLight3" position="3.79123 5.58821 -0.033" material="emissive: #ffffff" geometry="depth: 0.14; height: 0.11" rotation="0 0 -8.18"></a-box>
+     <a-box id="boxLight4" position="-3.6653 5.58821 -0.033" material="emissive: #ffffff" geometry="depth: 0.14; height: 0.11" rotation="0 0 8.18"></a-box>
+     <a-box id="boxLight5" position="3.79123 5.58821 3.986" material="emissive: #ffffff" geometry="depth: 0.14; height: 0.11" rotation="0 0 -8.18"></a-box>
+     <a-box id="boxLight6" position="-3.6653 5.58821 3.986" material="emissive: #ffffff" geometry="depth: 0.14; height: 0.11" rotation="0 0 8.18"></a-box>
+   
+</a-scene>
+</body>
+</html>
