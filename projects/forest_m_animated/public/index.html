@@ -1,0 +1,257 @@
+<html>
+ <head>
+    <meta charset="utf-8">
+    <title>LIRKIS G-CVE VR platform</title>
+    <meta name="description" content="Basic Example — Networked-Aframe">
+     <!--AFRAME release + extras with dynamic functionality----------------------------------------------------------------->
+    <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>  
+    <!--SUPERHANDS SCRIPT--------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/super-hands/dist/super-hands.min.js"></script>
+    <!-- AFRAME EXTRAS components------------------------------------------------------------------------------------------->
+    <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v5.0.0/dist/aframe-extras.js"></script>
+    <!-- NETWORKED AFRAME -------------------------------------------------------------------------------------------------->    
+    <script src="https://unpkg.com/networked-aframe@^0.6.1/dist/networked-aframe.min.js"></script>  
+<!--     <script src="/js/networkedAF.js"></script> -->
+    <!--PHYSICS SYSTEM------------------------------------------------------------------------------------------------------>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.1.1/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script>
+    <!--COMMUNICATION MODULES----------------------------------------------------------------------------------------------->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>   
+    <script src="easyrtc/easyrtc.js"></script>
+    <!--OTHER SCRIPTS------------------------------------------------------------------------------------------------------->
+    <script src="https://unpkg.com/aframe-randomizer-components@^3.0.1/dist/aframe-randomizer-components.min.js"></script>
+    <!--CAM KINEMATICS COMPONENT-------------------------------------------------------------------------------------------->
+    <script src="https://rawgit.com/urish/aframe-camera-events/master/index.js"></script> 
+   <!--GAZE BUTTONS VR TOUR-------------------------------------------------------------------------------------------->
+   <script src="js/gaze_buttons.js"></script> 
+   <script src="https://unpkg.com/aframe-geometry-merger-component/dist/aframe-geometry-merger-component.min.js"></script> 
+</head>
+<body>
+    
+<!--- A-FRAME SCENE ----------------------------------------------------------------------------------------------------->
+    <a-scene 
+   
+      physics 
+      networked-scene="
+      room: basic;
+      debug: true;                      
+    ">
+<!-- ASSETS INCLUDING ITEMS, MATERIAL, 3D OBJETS, SOURCES AND MIXINS, which are used to build 3D virtual environment --->      
+  <a-assets timeout="15000">
+<!-- PATHs of attached models -  stored on github ------------------------------------------------------------------------>
+              <a-asset-item id="hmd-obj" src="https://raw.githubusercontent.com/mayorian/3dmodels/master/avatar/avatar.obj"></a-asset-item>
+              <a-asset-item id="hmd-mtl" src="https://raw.githubusercontent.com/mayorian/3dmodels/master/avatar/avatar.mtl"></a-asset-item>
+
+              <a-asset-item id="body-obj" src="https://cdn.glitch.com/ae1a6582-b74d-4c82-bb71-faf627e4789b%2Fbodys.obj?v=1560985819906"></a-asset-item>
+              <a-asset-item id="body-mtl" src=""></a-asset-item>
+
+              <a-asset-item id="building-obj" src="https://raw.githubusercontent.com/MariaMedvidova/bakalarka/master/les/tisici_model/zeby_to_bolo.obj" crossorigin="anonymous"></a-asset-item>
+              <a-asset-item id="building-mtl" src="https://raw.githubusercontent.com/MariaMedvidova/bakalarka/master/les/tisici_model/zeby_to_bolo.mtl" crossorigin="anonymous"></a-asset-item>
+
+                 <!--
+              <a-asset-item id="oblak-obj" src="https://raw.githubusercontent.com/MariaMedvidova/bakalarka/master/oblak5/oblak_2d.obj" crossorigin="anonymous"></a-asset-item>
+              <a-asset-item id="oblak-mtl" src="https://raw.githubusercontent.com/MariaMedvidova/bakalarka/master/oblak5/oblak_2d.mtl" crossorigin="anonymous"></a-asset-item>
+                -->
+        
+                <img id="sky1" src="https://raw.githubusercontent.com/MariaMedvidova/bakalarka/master/AdobeStock_269104660.jpeg" crossorigin="anonymous" />
+
+                
+              <a-asset-item id="kacka-obj" src="https://raw.githubusercontent.com/MariaMedvidova/bakalarka/master/les/kacky/kacky.obj" crossorigin="anonymous"></a-asset-item>
+              <a-asset-item id="kacka-mtl" src="https://raw.githubusercontent.com/MariaMedvidova/bakalarka/master/les/kacky/kacky.mtl" crossorigin="anonymous"></a-asset-item>
+        
+    
+    
+<!-- Templates - objects utilized in AVATAR MODEL construction ------------------------------------------------------------------------>
+    
+              <template id="avatar-template">
+                    <a-entity class="avatar">
+                            <a-obj-model src="#hmd-obj" mtl="#hmd-mtl" scale="0.5 0.5 0.5">
+                            </a-obj-model>
+                            <a-sphere class="head" color="#A0A0B2" scale="0.2 0.2 0.2" position="0 -0.08 0"  opacity="0.8"></a-sphere> 
+                          <a-entity class="rayhead" id="raycaster" cursor raycaster="objects: .clickable; showLine: true; far: 500" line="color: white; opacity: 1" position="0 0 0 " visible="true"></a-entity> 
+                      <a-obj-model src="#body-obj" mtl="#body-mtl" scale="0.04 0.02 0.02" position="0 -0.6 0"  visible="false" opacity="0.7">                           
+                      </a-obj-model>                
+                    </a-entity>  
+
+              </template>
+
+              <template id="avatar-body">
+                  <a-entity class="bodyavatar">                        
+                    <a-obj-model src="#body-obj" mtl="#body-mtl" scale="0.05 0.04 0.05 " opacity="0.7">                           
+                    </a-obj-model>    
+                  </a-entity>
+              </template>
+  </a-assets> 
+<!-- /END OF ASSETS---------------------------------------------------------------------------------------------------->
+
+<!--SHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      <!-- AVATAR BODY ------------->
+      <a-entity id="fullbody"> 
+         <a-entity   
+                    id="rig"      
+                    networked="template:#avatar-body;attachTemplateToLocal:false;"      
+                    position = "6 0 6"
+                    rotation="0 30 0"
+                    movement-controls   
+                    gaze-interaction  
+                    >
+                  <a-entity
+                            id="playerhead"
+                            networked="template:#avatar-template;attachTemplateToLocal:false;"  
+                            camera 
+                            position="0 1.6 0"
+                            look-controls="pointerLockEnabled:false"                          
+                            >                  
+                             <!--END OF 3D CURSOR IMPLEMENTATION ------------------------------------------->
+                             <a-sphere class="head" visible="true" random-color></a-sphere>
+                             <a-entity class="rayhead" cursor raycaster="objects: .clickable; showLine: true; far: 500" line="color: white; opacity: 1" position="0 0 0" visible="false"></a-entity> 
+                            <!-- <a-entity cursor="fuse: true; fuseTimeout: 500" geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: black; shader: flat" position="0 0 -1"></a-entity> -->
+                  </a-entity>  
+         </a-entity>  
+      </a-entity> 
+      <!-- END OF AVATAR BODY ------------->
+<!-- END OFSHARED ENTITIES------------------------------------------------------------------------------------------------------>   
+      
+ <!-- NETWORKED AFRAME SCHEMES NAF including shared template and its property---------------------------------------------->   
+      <script>
+          NAF.schemas.add({
+        template: '#avatar-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.head',
+            component: 'material',
+            property: 'color'
+          },
+        ]
+      });
+        
+        //document.querySelector('a-scene').renderer.setTexture2D(ourTexture, 0);
+    </script>
+      
+<!-- ENVIRONMENT OBJECTs------------------------------------------------------------------------------------------------------>   
+      
+       <a-text value="LIRKIS G-CVE" lirkis-text-component position="3.380 3.208 -4.681" rotation="0 -90 0" color="#116fe1" 
+               align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt" scale="3 3 1" ></a-text> 
+      
+           
+      <a-obj-model src="#building-obj" 
+                   mtl="#building-mtl" 
+                   scale="1 1 1" rotation="0 0 0">
+      </a-obj-model>
+     
+<!--  MRAKY ---------------------------------------------------------------------------------------------------------------- 
+         <a-obj-model id="1" src="#oblak-obj" mtl="#oblak-mtl" 
+                  position="-70 14 -43"
+                   scale="4 3 5" rotation="100 -10 0"
+                  animation="property: position; dir:alternate ; to: 35 8 -43; dur: 35000; easing: linear; loop: true">
+        </a-obj-model>
+        <a-obj-model id="2" src="#oblak-obj" mtl="#oblak-mtl" 
+                  position="-29 30 45"
+                   scale="14 2 20" rotation="0 90 0"
+                  animation="property: position; dir:alternate ; to: 40 40 -45; dur: 70000; easing: linear; loop: true" >
+                   </a-obj-model>
+      
+      <a-entity rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 60000">
+        <a-obj-model id="3" src="#oblak-obj" mtl="#oblak-mtl" 
+                  position="50 12 -7"
+                   scale="5 2 4" rotation="87 -165 -85"
+                   ></a-obj-model>
+      </a-entity>
+      
+        <a-obj-model id="4" src="#oblak-obj" mtl="#oblak-mtl" position="0 50 -40" scale="10 2 17" rotation="0 90 0"
+                   animation="property: position; dir:alternate ; to: 5 50 45; dur: 60000; easing: linear; loop: true" >
+               </a-obj-model>  
+       
+        <a-entity rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 60000">
+              <a-obj-model id="5"  src="#oblak-obj" mtl="#oblak-mtl" 
+                  position="5 23 -18"
+                   scale="4 2 4" rotation="38 -180 -180">
+                   </a-obj-model>
+              <a-obj-model id="6" src="#oblak-obj" mtl="#oblak-mtl" 
+                  position="-9 8 49"
+                   scale="6 3 4" rotation="90 0 0">
+                 </a-obj-model>
+      </a-entity>
+ -----------------------------------------------------------KONIEC MRAKY ------------------------------------------------------>    
+      
+<!-- -----------------------------VTAKY ------------------------------------------------------------------------------------------->
+      <a-entity id="vtak1">
+      <a-box position="-10 15 10" scale="0.2 0.2 0.2" color="black"
+              animation="property: position; dir:alternate ; to: 5 8 -18; dur: 20000; easing: linear; loop: true" 
+              animation__2="property: rotation; dir:alternate; to: 25 0 0; loop: true; dur: 600"
+             ></a-box>
+      <a-box position="-10 15 10" 
+             scale="0.1 0.05 1"
+             rotation="-25 0 0"
+             color="black"
+            animation__2="property: rotation; dir:alternate; to: 25 0 0; loop: true; dur: 600"
+            animation="property: position; dir:alternate ; to: 5 8 -18; dur: 20000; easing: linear; loop: true" 
+      ></a-box>  
+        </a-entity>
+      
+       <a-entity id="vtak2">
+      <a-box position="10 15 10" scale="0.2 0.2 0.2" color="black"
+              animation="property: position; dir:alternate ; to: -15 8 -18; dur: 20000; easing: linear; loop: true" 
+              animation__2="property: rotation; dir:alternate; to: 25 20 0; loop: true; dur: 400"
+             ></a-box>
+      <a-box position="10 15 10" 
+             scale="0.1 0.05 1"
+               rotation="-25 0 0"
+             color="black"
+            animation__2="property: rotation; dir:alternate; to: 25 20 0; loop: true; dur: 400"
+            animation="property: position; dir:alternate ; to: -15 8 -18; dur: 20000; easing: linear; loop: true" 
+      ></a-box>  
+        </a-entity>
+      
+       <a-entity id="vtak3">
+      <a-box position="-10 15 0" scale="0.2 0.2 0.2" color="black"
+              animation="property: position; dir:alternate ; to: 5 8 -18; dur: 15000; easing: linear; loop: true" 
+              animation__2="property: rotation; dir:alternate; to: 20 20 0; loop: true; dur: 500"
+             ></a-box>
+      <a-box position="-10 15 0" 
+             scale="0.1 0.05 1"
+               rotation="-25 0 0"
+             color="black"
+            animation__2="property: rotation; dir:alternate; to: 20 20 0; loop: true; dur: 500"
+            animation="property: position; dir:alternate ; to: 5 8 -18; dur: 15000; easing: linear; loop: true" 
+      ></a-box>  
+        </a-entity>
+      
+       <a-entity id="vtak4">
+      <a-box position="-35 13 -11" scale="0.2 0.2 0.2" color="black"
+              animation="property: position; dir:alternate ; to: 24 8 13; dur: 15000; easing: linear; loop: true" 
+              animation__2="property: rotation; dir:alternate; to: 24 20 0; loop: true; dur: 500"
+             ></a-box>
+      <a-box position="-35 13 -11" 
+             scale="0.1 0.05 1"
+               rotation="-25 0 0"
+             color="black"
+            animation__2="property: rotation; dir:alternate; to: 20 20 0; loop: true; dur: 500"
+            animation="property: position; dir:alternate ; to: 24 8 13; dur: 15000; easing: linear; loop: true" 
+      ></a-box>  
+        </a-entity>
+ <!-- ---------------------------------------------------------KONIEC VTAKY ------------------------------------------------------>
+      
+    <!--LIGHTS implementation -->
+     <a-entity light="color: #fff; intensity: 1.5; type: ambient;" visible="true"></a-entity>
+ 
+    
+      
+      <a-obj-model src="#kacka-obj" 
+                   mtl="#kacka-mtl" 
+                   scale="2 3 2" rotation="0 0 0" position="0 0 -3"
+                   animation="property: position; dir:alternate ; to: 0 0 0; dur: 10000; easing: linear; loop: true" 
+                   >
+      </a-obj-model>
+     
+ 
+     <a-sky src="#sky1" rotation="0 180 0"></a-sky> 
+</a-scene>
+
+  </body>
+</html>
+
+
